@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Eksekutif: Reduce Inventory</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Inter', 'sans-serif'],
+                        serif: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@0.292.0"></script>
+</head>
+<body class="min-h-screen bg-[#F8FAFC] font-sans pb-12">
+
+    <!-- Top Corporate Banner -->
+    <div class="w-full h-12 bg-[#0F172A] flex items-center justify-between px-6 shadow-sm">
+        <span class="text-white text-xs font-bold tracking-wider">PROJECT REDUCE INVENTORY MONITORING</span>
+        <div class="bg-white h-8 px-3 flex items-center rounded-sm">
+            <span class="text-[#0F172A] font-black italic text-base tracking-tight mr-1.5">BSS</span>
+            <span class="text-black font-bold text-[8px] leading-tight flex flex-col justify-center border-l-2 border-slate-300 pl-1.5">
+                <span>SINERGI</span>
+                <span>MAXIMIZE</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="max-w-[1600px] mx-auto px-4 md:px-8 mt-6">
+        
+        <!-- Header Section -->
+        <header class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="flex items-stretch gap-3">
+                <div class="w-2 bg-[#0F172A]"></div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-[#1D2B36] uppercase tracking-tight">
+                        Dashboard Eksekutif: Reduce Inventory
+                    </h1>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                        Analisa First Difference & Kalibrasi Part Non-SOH (Sistem vs Fisik)
+                    </p>
+                </div>
+            </div>
+            <div class="bg-[#1E293B] text-white px-4 py-1.5 rounded-sm flex items-center gap-2 text-xs font-bold shadow-md">
+                <div class="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></div>
+                <span>STATUS: ON TRACK</span>
+            </div>
+        </header>
+
+        <!-- KPI Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <!-- Card 1 (Total SOH with Google Sheets Link - Updated to Rp 12.34 M) -->
+            <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#0F172A] border-t-[#1E293B]">
+                <div class="mb-4">
+                    <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Total SOH (Sistem Awal)</p>
+                    <h3 class="text-3xl font-black text-white tracking-tight">Rp 12.34 M</h3>
+                </div>
+                <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1337344623#gid=1337344623" target="_blank" rel="noreferrer" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3 hover:text-white transition-colors cursor-pointer" title="Lihat data di Google Sheets">
+                    <i data-lucide="external-link" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
+                    Baseline Q1 2026
+                </a>
+            </div>
+            <!-- Card 2 (Updated to Rp 14.2 M) -->
+            <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#1E293B] border-t-[#334155]">
+                <div class="mb-4">
+                    <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Undetected / Non-SOH</p>
+                    <h3 class="text-3xl font-black text-white tracking-tight">Rp 14.2 M</h3>
+                </div>
+                <div class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
+                    <i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
+                    Hasil Kalibrasi Fisik
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#334155] border-t-[#475569]">
+                <div class="mb-4">
+                    <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Target Reduksi</p>
+                    <h3 class="text-3xl font-black text-white tracking-tight">9.533 Item</h3>
+                </div>
+                <div class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
+                    <i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
+                    Target Tahun 2026
+                </div>
+            </div>
+            <!-- Card 4 -->
+            <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#475569] border-t-[#64748B]">
+                <div class="mb-4">
+                    <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Actual Reduksi</p>
+                    <h3 class="text-3xl font-black text-white tracking-tight">141 Item</h3>
+                </div>
+                <div class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
+                    <i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
+                    1.5% Dari Target
+                </div>
+            </div>
+            <!-- Card 5 -->
+            <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#64748B] border-t-[#F1F5F9]">
+                <div class="mb-4">
+                    <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Achievement Progress</p>
+                    <h3 class="text-3xl font-black text-white tracking-tight">1.5%</h3>
+                </div>
+                <div class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
+                    <i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
+                    141 / 9.533 Item
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Column: Charts -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Analisa First Difference Card -->
+                <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm">
+                    <h2 class="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2 border-b border-gray-100 pb-3 mb-4">
+                        <i data-lucide="search" class="text-[#0F172A]" style="width: 18px; height: 18px;"></i>
+                        Analisa First Difference vs Kalibrasi (Miliar Rp)
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-6 font-semibold">
+                        Perbandingan pergerakan inventory sistem (First Difference) dengan nilai kalibrasi fisik part Non-SOH.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <!-- SPRT -->
+                        <div class="relative">
+                            <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
+                                <span>SPRT (Spare Parts)</span>
+                                <span class="font-mono text-slate-500">Sistem (First Diff): 6.97 M</span>
+                            </div>
+                            <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
+                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 6.97 M">Sistem: 6.97 M</div>
+                            </div>
+                        </div>
+                        <!-- FOGC -->
+                        <div class="relative">
+                            <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
+                                <span>FOGC</span>
+                                <span class="font-mono text-slate-500">Sistem (First Diff): 3.07 M</span>
+                            </div>
+                            <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
+                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 3.07 M">Sistem: 3.07 M</div>
+                            </div>
+                        </div>
+                        <!-- MDLE -->
+                        <div class="relative">
+                            <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
+                                <span>MDLE</span>
+                                <span class="font-mono text-slate-500">Sistem (First Diff): 1.64 M</span>
+                            </div>
+                            <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
+                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 1.64 M">Sistem: 1.64 M</div>
+                            </div>
+                        </div>
+                        <!-- TYRE -->
+                        <div class="relative">
+                            <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
+                                <span>TYRE</span>
+                                <span class="font-mono text-slate-500">Sistem (First Diff): 473.6 Jt</span>
+                            </div>
+                            <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
+                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 473.6 Jt">Sistem: 473.6 Jt</div>
+                            </div>
+                        </div>
+                        <!-- GENS -->
+                        <div class="relative">
+                            <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
+                                <span>GENS</span>
+                                <span class="font-mono text-slate-500">Sistem (First Diff): 187.9 Jt</span>
+                            </div>
+                            <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
+                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 187.9 Jt">Sistem: 187.9 Jt</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex text-[10px] text-slate-500 font-bold uppercase mt-6 gap-6 justify-center">
+                        <span class="flex items-center gap-2"><div class="w-3 h-3 bg-[#334155] rounded-sm"></div> Pergerakan Sistem (First Diff)</span>
+                        <span class="flex items-center gap-2"><div class="w-3 h-3 bg-[#94A3B8] rounded-sm"></div> Kalibrasi Non-SOH (Fisik - Belum Berprogres)</span>
+                    </div>
+                </div>
+
+                <!-- Achievement Progress Card (Line Chart) -->
+                <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm">
+                    <h2 class="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2 border-b border-gray-100 pb-3 mb-4">
+                        <i data-lucide="trending-down" class="text-[#0F172A]" style="width: 18px; height: 18px;"></i>
+                        Achievement Progress: Plan vs Actual (Item)
+                    </h2>
+                    
+                    <!-- 3 Box Metrics Dynamic -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="p-3 rounded-sm border-t-4 shadow-sm flex flex-col justify-between text-white bg-[#0F172A] border-t-[#1E293B]">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Plan (Kumulatif)</div>
+                            <div class="text-2xl font-black text-white tracking-tight" id="plan-kumulatif-val">0 Item</div>
+                            <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Target +390/Hari</div>
+                        </div>
+                        <div class="p-3 rounded-sm border-t-4 shadow-sm flex flex-col justify-between text-white bg-[#1E293B] border-t-[#334155]">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Actual (Final)</div>
+                            <div class="text-2xl font-black text-white tracking-tight" id="actual-final-val">0 Item</div>
+                            <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Total Item Close</div>
+                        </div>
+                        <div class="p-3 rounded-sm border-t-4 shadow-sm flex flex-col justify-between text-white bg-[#334155] border-t-[#475569]">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Selisih (Gap)</div>
+                            <div class="text-2xl font-black text-white tracking-tight" id="selisih-gap-val">0 Item</div>
+                            <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Plan - Actual</div>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full aspect-[2/1] min-h-[250px] mt-6">
+                        <!-- SVG Chart Dinamis digenerate via Javascript -->
+                        <svg id="achievement-chart" viewBox="0 0 800 320" class="w-full h-full overflow-visible">
+                        </svg>
+                    </div>
+
+                    <!-- Legends -->
+                    <div class="flex justify-center text-[10px] text-slate-500 font-bold uppercase mt-8 gap-6">
+                        <span class="flex items-center gap-2"><div class="w-4 border-t-2 border-dashed border-gray-400"></div> Target Rencana (+390 Item/Hari)</span>
+                        <span class="flex items-center gap-2"><div class="w-3 h-3 bg-[#1E293B] rounded-sm"></div> Akumulasi Item Close</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Brief Timeline Diagram -->
+            <div class="lg:col-span-1">
+                <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm h-full">
+                    <h2 class="text-sm font-black text-[#1D2B36] uppercase tracking-wider border-b border-gray-100 pb-3 mb-6">
+                        <i data-lucide="clock" class="text-[#0F172A] inline-block mr-1" style="width: 18px; height: 18px; vertical-align: text-bottom;"></i>
+                        Alur Progres Proyek
+                    </h2>
+                    
+                    <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                        
+                        <!-- Fase 1 -->
+                        <div class="relative flex items-center justify-between md:justify-normal group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white shrink-0 shadow-sm z-10 bg-[#0F172A] text-white">
+                                <i data-lucide="check-circle-2" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-[#0F172A]">Selesai</span>
+                                    <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">24 May 2026</span>
+                                </div>
+                                <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 1: Ekstraksi Data SOH</h3>
+                                <p class="text-[10px] text-slate-400 mt-1 font-semibold">Penarikan Data Mentah</p>
+                            </div>
+                        </div>
+
+                        <!-- Fase 2 -->
+                        <div class="relative flex items-center justify-between md:justify-normal group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white shrink-0 shadow-sm z-10 bg-[#1E293B] text-white">
+                                <i data-lucide="check-circle-2" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-[#1E293B]">Selesai</span>
+                                    <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">24 May 2026</span>
+                                </div>
+                                <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 2: Analisa First Difference</h3>
+                                <p class="text-[10px] text-slate-400 mt-1 font-semibold">Mapping Kandidat Swap</p>
+                            </div>
+                        </div>
+
+                        <!-- Fase 3 -->
+                        <div class="relative flex items-center justify-between md:justify-normal group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white shrink-0 shadow-sm z-10 bg-[#334155] text-white">
+                                <i data-lucide="activity" class="animate-pulse" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-[#334155]">Berjalan</span>
+                                    <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">29 May - 18 Jun 2026</span>
+                                </div>
+                                <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 3: Kalibrasi Fisik (Non-SOH)</h3>
+                                <p class="text-[10px] text-slate-400 mt-1 font-semibold">Stock Take & Eksekusi Swap</p>
+                            </div>
+                        </div>
+
+                        <!-- Fase 4 -->
+                        <div class="relative flex items-center justify-between md:justify-normal group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white shrink-0 shadow-sm z-10 bg-[#334155] text-white">
+                                <i data-lucide="activity" class="animate-pulse" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-[#334155]">Berjalan (Paralel)</span>
+                                    <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">29 May - 25 Jun 2026</span>
+                                </div>
+                                <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 4: Eksekusi Reduksi & Disposal</h3>
+                                <p class="text-[10px] text-slate-400 mt-1 font-semibold">Segregasi & Administrasi</p>
+                            </div>
+                        </div>
+
+                        <!-- Fase 5 -->
+                        <div class="relative flex items-center justify-between md:justify-normal group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white shrink-0 shadow-sm z-10 bg-slate-200 text-slate-400">
+                                <span class="font-bold text-xs">5</span>
+                            </div>
+                            <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Belum Mulai</span>
+                                    <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">26 Jun - 27 Jun 2026</span>
+                                </div>
+                                <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 5: PICA Final Difference</h3>
+                                <p class="text-[10px] text-slate-400 mt-1 font-semibold">Analisis Akar Masalah</p>
+                            </div>
+                        </div>
+
+                        <!-- Fase 6 -->
+                        <div class="relative flex items-center justify-between md:justify-normal group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white shrink-0 shadow-sm z-10 bg-slate-200 text-slate-400">
+                                <span class="font-bold text-xs">6</span>
+                            </div>
+                            <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Belum Mulai</span>
+                                    <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">28 Jun - 29 Jun 2026</span>
+                                </div>
+                                <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 6: Approval & Pengesahan</h3>
+                                <p class="text-[10px] text-slate-400 mt-1 font-semibold">Sign-off & Closing</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= PLAN EKSEKUSI PROYEK TABEL LENGKAP ================= -->
+        <div class="bg-white rounded-sm shadow-sm border border-gray-200 overflow-hidden mt-6">
+            <div class="p-4 border-b border-gray-100 bg-[#FAFAFA] flex items-center justify-between">
+                <h3 class="text-xs font-black text-[#1D2B36] flex items-center gap-2 uppercase tracking-wider">
+                    <i data-lucide="clock" class="text-[#0F172A]" style="width: 16px; height: 16px;"></i>
+                    Plan Eksekusi & Detail Timeline Proyek Reduksi SOH
+                </h3>
+                <span class="text-[10px] text-slate-500 font-bold uppercase">6 FASE UTAMA SINKRONISASI</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1200px]">
+                    <thead>
+                        <tr class="bg-[#0F172A] text-white text-[10px] font-black uppercase tracking-wider">
+                            <th class="p-3 w-40">Fase</th>
+                            <th class="p-3 w-48">Aktivitas Utama</th>
+                            <th class="p-3">Sub Aktivitas</th>
+                            <th class="p-3 w-28 text-center">Estimasi Durasi</th>
+                            <th class="p-3 w-28 text-center">Start Date</th>
+                            <th class="p-3 w-28 text-center">End Date</th>
+                            <th class="p-3 w-48">Hasil Akhir (Deliverable)</th>
+                            <th class="p-3 w-48">Quality Gate / CCP</th>
+                            <th class="p-3 w-24 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-xs text-slate-700">
+                        
+                        <!-- Baris 1 -->
+                        <tr class="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                            <td class="p-3 font-extrabold text-[#1D2B36] border-r border-slate-100">Fase 1: Ekstraksi Data SOH</td>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-100">Penarikan Data Mentah</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 leading-relaxed">Ekstraksi data sistem untuk populasi 5.933 Part Non SOH</td>
+                            <td class="p-3 text-center font-bold text-slate-800 border-r border-slate-100">1 Hari</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">24 May 2026</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">24 May 2026</td>
+                            <td class="p-3 font-semibold text-slate-700 border-r border-slate-100">Database Raw Non SOH</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 font-medium">Tarikan data sukses 100%</td>
+                            <td class="p-3 text-center align-middle">
+                                <span class="inline-block bg-green-100 text-green-800 text-[9px] font-black uppercase px-2 py-1 rounded-sm">Selesai</span>
+                            </td>
+                        </tr>
+
+                        <!-- Baris 2 -->
+                        <tr class="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                            <td class="p-3 font-extrabold text-[#1D2B36] border-r border-slate-100">Fase 2: Analisa First Difference</td>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-100">Mapping Kandidat Swap</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 leading-relaxed">Menyandingkan 5.933 item vs Daftar Discrepancy</td>
+                            <td class="p-3 text-center font-bold text-slate-800 border-r border-slate-100">1 Hari</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">24 May 2026</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">24 May 2026</td>
+                            <td class="p-3 font-semibold text-slate-700 border-r border-slate-100">Daftar Kandidat Swap</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 font-medium">Akurasi mapping logika sistem</td>
+                            <td class="p-3 text-center align-middle">
+                                <span class="inline-block bg-green-100 text-green-800 text-[9px] font-black uppercase px-2 py-1 rounded-sm">Selesai</span>
+                            </td>
+                        </tr>
+
+                        <!-- Baris 3 -->
+                        <tr class="border-b border-gray-100 hover:bg-slate-50 transition-colors bg-[#EAF0E8]">
+                            <td class="p-3 font-extrabold text-[#1D2B36] border-r border-slate-100">Fase 3: Kalibrasi Fisik (Non-SOH)</td>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-100">Stock Take & Eksekusi Swap</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 leading-relaxed">Penghitungan 15 hari oleh 6 org fisik + paralel input oleh 2 Admin SAP & 1 Doc Controller</td>
+                            <td class="p-3 text-center font-bold text-slate-800 border-r border-slate-100">3 Minggu</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">29 May 2026</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">18 Jun 2026</td>
+                            <td class="p-3 font-semibold text-slate-700 border-r border-slate-100">SOH Ter-update & Discrepancy tertutup</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 font-medium">Validasi dokumen harian oleh Doc Controller</td>
+                            <td class="p-3 text-center align-middle">
+                                <span class="inline-block bg-[#1E293B] text-white text-[9px] font-black uppercase px-2 py-1 rounded-sm animate-pulse">Berjalan</span>
+                            </td>
+                        </tr>
+
+                        <!-- Baris 4 -->
+                        <tr class="border-b border-gray-100 hover:bg-slate-50 transition-colors bg-[#EAF0E8]">
+                            <td class="p-3 font-extrabold text-[#1D2B36] border-r border-slate-100">Fase 4: Eksekusi Reduksi & Disposal</td>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-100">Segregasi & Administrasi</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 leading-relaxed">Pemisahan fisik sisa barang unmatch & persiapan dokumen pemusnahan/lelang</td>
+                            <td class="p-3 text-center font-bold text-slate-800 border-r border-slate-100">4 Minggu</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">29 May 2026</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">25 Jun 2026</td>
+                            <td class="p-3 font-semibold text-slate-700 border-r border-slate-100">Berita Acara Eksekusi Aset</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 font-medium">Kesesuaian fisik sisa dengan dokumen lelang</td>
+                            <td class="p-3 text-center align-middle">
+                                <span class="inline-block bg-[#1E293B] text-white text-[9px] font-black uppercase px-2 py-1 rounded-sm animate-pulse">Berjalan</span>
+                            </td>
+                        </tr>
+
+                        <!-- Baris 5 -->
+                        <tr class="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                            <td class="p-3 font-extrabold text-[#1D2B36] border-r border-slate-100">Fase 5: PICA Final Difference</td>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-100">Analisis Akar Masalah</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 leading-relaxed">Penelusuran penyebab sisa selisih (Rp 14,2 M - Nilai Ter-swap)</td>
+                            <td class="p-3 text-center font-bold text-slate-800 border-r border-slate-100">2 Hari</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">26 Jun 2026</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">27 Jun 2026</td>
+                            <td class="p-3 font-semibold text-slate-700 border-r border-slate-100">Dokumen PICA Final Difference</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 font-medium">Akar masalah logis & faktual</td>
+                            <td class="p-3 text-center align-middle">
+                                <span class="inline-block bg-gray-100 text-gray-500 text-[9px] font-black uppercase px-2 py-1 rounded-sm">Pending</span>
+                            </td>
+                        </tr>
+
+                        <!-- Baris 6 -->
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-3 font-extrabold text-[#1D2B36] border-r border-slate-100">Fase 6: Approval & Pengesahan</td>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-100">Sign-off & Closing</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 leading-relaxed">Rapat finalisasi proyek & pengesahan laporan Final Difference / Write-off</td>
+                            <td class="p-3 text-center font-bold text-slate-800 border-r border-slate-100">2 Hari</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">28 Jun 2026</td>
+                            <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">29 Jun 2026</td>
+                            <td class="p-3 font-semibold text-slate-700 border-r border-slate-100">Sign-off Project</td>
+                            <td class="p-3 text-slate-600 border-r border-slate-100 font-medium">Persetujuan Dept Head</td>
+                            <td class="p-3 text-center align-middle">
+                                <span class="inline-block bg-gray-100 text-gray-500 text-[9px] font-black uppercase px-2 py-1 rounded-sm">Pending</span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ================= STRUKTUR ORGANISASI TIM PROYEK ================= -->
+        <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-6 mt-6">
+            <div class="border-b border-gray-100 pb-3 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <h3 class="text-xs font-black text-[#1D2B36] flex items-center gap-2 uppercase tracking-wider">
+                    <i data-lucide="users" class="text-[#0F172A]" style="width: 16px; height: 16px;"></i>
+                    Struktur Organisasi & Pembagian Peran Tim Proyek
+                </h3>
+                <span class="text-[10px] text-slate-500 font-bold uppercase bg-slate-100 px-2 py-0.5 rounded border border-gray-200">Total Personel: 10 Orang</span>
+            </div>
+
+            <div class="flex flex-col items-center gap-4">
+                <!-- Level 1: Lead Project -->
+                <div class="flex flex-col items-center">
+                    <div class="bg-[#0F172A] text-white p-4 rounded-sm shadow-md text-center w-72 border-t-4 border-[#334155]">
+                        <div class="flex justify-center mb-1.5">
+                            <i data-lucide="shield" class="text-slate-300" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <div class="font-black text-xs uppercase tracking-wider">Lead Project</div>
+                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold">1 Personel</div>
+                        <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-700 pt-2 leading-relaxed font-semibold">
+                            Koordinator Utama & Penanggung Jawab Proyek Lintas Departemen, Monitoring Progress & Pengesahan Sign-Off
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connector Line -->
+                <div class="h-6 w-0.5 bg-slate-300"></div>
+
+                <!-- Level 2: Core Admin & Doc Control -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+                    <!-- Admin SAP -->
+                    <div class="bg-[#1E293B] text-white p-4 rounded-sm shadow-md text-center border-t-4 border-[#475569]">
+                        <div class="flex justify-center mb-1.5">
+                            <i data-lucide="database" class="text-slate-300" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <div class="font-black text-xs uppercase tracking-wider">Admin SAP</div>
+                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold">2 Personel</div>
+                        <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-600 pt-2 leading-relaxed font-semibold">
+                            Pemasukan Data ke SAP, Penyandian Selisih First Difference & Update Status SOH Secara Paralel
+                        </div>
+                    </div>
+
+                    <!-- Document Controller -->
+                    <div class="bg-[#1E293B] text-white p-4 rounded-sm shadow-md text-center border-t-4 border-[#475569]">
+                        <div class="flex justify-center mb-1.5">
+                            <i data-lucide="file-text" class="text-slate-300" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <div class="font-black text-xs uppercase tracking-wider">Document Controller</div>
+                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold">1 Personel</div>
+                        <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-600 pt-2 leading-relaxed font-semibold">
+                            Validasi Keabsahan Dokumen Fisik, Rekonsiliasi Lapangan & Penyusunan Berita Acara (BA) Proyek
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connector Line -->
+                <div class="h-6 w-0.5 bg-slate-300"></div>
+
+                <!-- Level 3: Field Team (Fisik) -->
+                <div class="w-full max-w-md">
+                    <div class="bg-[#334155] text-white p-4 rounded-sm shadow-md text-center border-t-4 border-[#64748B]">
+                        <div class="flex justify-center mb-1.5">
+                            <i data-lucide="users" class="text-slate-300" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <div class="font-black text-xs uppercase tracking-wider">Tim Lapangan (Verifikator Fisik)</div>
+                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold">6 Personel</div>
+                        <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-600 pt-2 leading-relaxed font-semibold">
+                            Eksekusi Stock Take, Penghitungan Fisik SOH & Non-SOH, Pelabelan, Segregasi, serta Pemindahan Lokasi
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Initialize Icons -->
+    <script>
+      lucide.createIcons();
+
+      // LOGIKA DINAMIS ACHIEVEMENT PROGRESS (PLAN 390/HARI, ACTUAL, GAP)
+      document.addEventListener('DOMContentLoaded', () => {
+          const startDate = new Date('2026-05-29T00:00:00');
+          const today = new Date();
+          
+          // Hitung hari berjalan (Asumsi minimal hari ke-1 jika proyek sudah/akan dimulai)
+          let timeDiff = today.getTime() - startDate.getTime();
+          let daysPassed = Math.floor(timeDiff / (1000 * 3600 * 24)) + 1;
+          
+          // Batasi hari berjalan antara 1 hingga 21 (29 Mei - 18 Jun = 21 Hari)
+          const totalDays = 21; 
+          if (daysPassed < 1) daysPassed = 1; 
+          if (daysPassed > totalDays) daysPassed = totalDays;
+
+          // Variabel Data
+          const dailyPlan = 390;
+          const planKumulatif = daysPassed * dailyPlan; 
+          const actualTotal = 141; // Berdasarkan Actual statis (Bisa diganti var dinamis database)
+          const gap = planKumulatif - actualTotal;
+
+          // Update UI Angka (3 Cards di atas Chart)
+          document.getElementById('plan-kumulatif-val').textContent = planKumulatif.toLocaleString('id-ID') + ' Item';
+          document.getElementById('actual-final-val').textContent = actualTotal.toLocaleString('id-ID') + ' Item';
+          
+          const gapElem = document.getElementById('selisih-gap-val');
+          gapElem.textContent = gap.toLocaleString('id-ID') + ' Item';
+          gapElem.className = "text-2xl font-black text-white tracking-tight"; // Menjaga warna teks agar tetap konsisten dengan card
+
+          // MENGGAMBAR DIAGRAM GARIS SECARA DINAMIS
+          const svg = document.getElementById('achievement-chart');
+          const yMax = 10000; // Skala Y Maximum
+          const graphHeight = 240;
+          const yOffset = 280;
+          
+          // Kalkulator Skala Y
+          function getY(val) {
+              return yOffset - (val / yMax) * graphHeight;
+          }
+
+          let svgContent = '';
+          
+          // 1. Grid Y (Skala per 2000)
+          for (let i = 0; i <= 10000; i += 2000) {
+              const y = getY(i);
+              svgContent += `
+                  <g>
+                      <line x1="50" y1="${y}" x2="760" y2="${y}" stroke="#E5E7EB" stroke-width="0.75" stroke-dasharray="3,3" />
+                      <text x="40" y="${y + 4}" font-size="10" font-weight="700" fill="#9CA3AF" text-anchor="end">${i.toLocaleString('id-ID')}</text>
+                  </g>
+              `;
+          }
+
+          // 2. Grid X
+          const xLabels = ['29 May', '01 Jun', '04 Jun', '07 Jun', '10 Jun', '13 Jun', '16 Jun', '18 Jun'];
+          const xPositions = [50, 151.428, 252.857, 354.285, 455.714, 557.142, 658.571, 760];
+          for (let i = 0; i < xLabels.length; i++) {
+              const x = xPositions[i];
+              svgContent += `
+                  <g>
+                      <line x1="${x}" y1="40" x2="${x}" y2="280" stroke="#F3F4F6" stroke-width="1" />
+                      <text x="${x}" y="300" font-size="10" font-weight="700" fill="#9CA3AF" text-anchor="middle">${xLabels[i]}</text>
+                  </g>
+              `;
+          }
+
+          // 3. Render Garis Plan (Kumulatif 390 per hari)
+          let planPath = `M 50 ${getY(dailyPlan)}`;
+          const xStep = 710 / (totalDays - 1); 
+          for (let i = 1; i < totalDays; i++) {
+              let currentPlan = (i + 1) * dailyPlan;
+              if(currentPlan > 9533) currentPlan = 9533; // Mentok di target maksimal
+              planPath += ` L ${50 + i * xStep} ${getY(currentPlan)}`;
+          }
+          svgContent += `<path d="${planPath}" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="5,4" />`;
+
+          // 4. Render Garis Actual 
+          let actualPath = `M 50 ${getY(141)}`; 
+          const currentX = 50 + (daysPassed - 1) * xStep;
+          
+          if (daysPassed > 1) {
+              actualPath += ` L ${currentX} ${getY(actualTotal)}`;
+          }
+          
+          svgContent += `<path d="${actualPath}" fill="none" stroke="#1E293B" stroke-width="3" />`;
+          svgContent += `<circle cx="${currentX}" cy="${getY(actualTotal)}" r="4" fill="#1E293B" stroke="#fff" stroke-width="1.5" />`;
+
+          svg.innerHTML = svgContent;
+      });
+    </script>
+</body>
+</html>

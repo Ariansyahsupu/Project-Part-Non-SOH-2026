@@ -51,11 +51,11 @@
             <form id="login-form" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">User Name</label>
-                    <input type="text" id="username" class="w-full px-3 py-2 border border-slate-200 rounded-sm focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] text-sm font-semibold text-slate-800" required placeholder="Masukkan User Name">
+                    <input type="text" id="username" class="w-full px-3 py-2 border border-slate-200 rounded-sm focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] text-sm font-semibold text-slate-800 uppercase" required placeholder="MASUKKAN USER NAME" oninput="this.value = this.value.toUpperCase()">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
-                    <input type="password" id="password" class="w-full px-3 py-2 border border-slate-200 rounded-sm focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] text-sm font-semibold text-slate-800" required placeholder="Masukkan Password">
+                    <input type="password" id="password" class="w-full px-3 py-2 border border-slate-200 rounded-sm focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] text-sm font-semibold text-slate-800 uppercase" required placeholder="MASUKKAN PASSWORD" oninput="this.value = this.value.toUpperCase()">
                 </div>
                 
                 <!-- Pesan Error -->
@@ -465,7 +465,7 @@
                                 <td class="p-3 font-semibold text-slate-700 border-r border-slate-100">SOH Ter-update & Discrepancy tertutup</td>
                                 <td class="p-3 text-slate-600 border-r border-slate-100 font-medium">Validasi dokumen harian oleh Doc Controller</td>
                                 <td class="p-3 text-center align-middle">
-                                    <span class="inline-block bg-[#1E293B] text-white text-[9px] font-black uppercase px-2 py-1 rounded-sm animate-pulse">Berjalan</span>
+                                    <span class="inline-block bg-[#1E293B] text-white text-[9px] font-black uppercase px-2 py-1 rounded-sm">Berjalan</span>
                                 </td>
                             </tr>
 
@@ -616,7 +616,8 @@
           const pass = document.getElementById('password').value;
           const errorMsg = document.getElementById('error-msg');
 
-          if (user === 'Palaran' && pass === 'PLR12345') {
+          // Dicocokkan secara case-sensitive dengan format HURUF KAPITAL sesuai instruksi
+          if (user === 'PALARAN' && pass === 'PLR12345') {
               // Sembunyikan layar login, tampilkan dashboard utama
               document.getElementById('login-container').classList.add('hidden');
               document.getElementById('main-dashboard').classList.remove('hidden');
@@ -873,7 +874,7 @@
 
               if (typeIndex === -1 || valIndex === -1) {
                   throw new Error('Kolom penting tidak ditemukan');
-              }
+                }
 
               let sums = { 'SPRT': 0, 'FOGC': 0, 'MDLE': 0, 'TYRE': 0, 'GENS': 0 };
               let totalSoh = 0;

@@ -114,26 +114,26 @@
                     Target Tahun 2026
                 </div>
             </div>
-            <!-- Card 4 -->
+            <!-- Card 4 (Actual Reduksi - Dynamic) -->
             <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#475569] border-t-[#64748B]">
                 <div class="mb-4">
                     <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Actual Reduksi</p>
-                    <h3 class="text-3xl font-black text-white tracking-tight">141 Item</h3>
+                    <h3 id="kpi-actual-reduksi" class="text-3xl font-black text-white tracking-tight">0 Item</h3>
                 </div>
-                <div class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
+                <div id="kpi-actual-reduksi-pct" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
                     <i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
-                    1.5% Dari Target
+                    0.00% Dari Target
                 </div>
             </div>
-            <!-- Card 5 -->
+            <!-- Card 5 (Achievement Progress - Dynamic) -->
             <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#64748B] border-t-[#F1F5F9]">
                 <div class="mb-4">
                     <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Achievement Progress</p>
-                    <h3 class="text-3xl font-black text-white tracking-tight">1.5%</h3>
+                    <h3 id="kpi-achievement-pct" class="text-3xl font-black text-white tracking-tight">0.00%</h3>
                 </div>
-                <div class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
+                <div id="kpi-achievement-ratio" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
                     <i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
-                    141 / 9.533 Item
+                    0 / 9.533 Item
                 </div>
             </div>
         </div>
@@ -670,69 +670,8 @@
           document.getElementById('last-sync-time').classList.remove('hidden');
       }
 
-      async function syncData() {
-          const syncIcon = document.getElementById('sync-icon');
-          const syncText = document.getElementById('sync-text');
-
-          // Aktifkan animasi spin
-          syncIcon.classList.add('animate-spin-custom');
-          syncText.textContent = 'Syncing...';
-
-          try {
-              const response = await fetch(SPREADSHEET_CSV_URL);
-              if (!response.ok) throw new Error('Gagal mengunduh CSV');
-              const csvText = await response.text();
-              const rows = parseCSV(csvText);
-
-              if (rows.length < 2) throw new Error('Format CSV tidak valid');
-
-              const headers = rows[0].map(h => h.trim().toLowerCase());
-              const typeIndex = headers.indexOf('material type');
-              const valIndex = headers.indexOf('value unrestricted');
-
-              if (typeIndex === -1 || valIndex === -1) {
-                  throw new Error('Kolom penting tidak ditemukan');
-              }
-
-              let sums = { 'SPRT': 0, 'FOGC': 0, 'MDLE': 0, 'TYRE': 0, 'GENS': 0 };
-              let totalSoh = 0;
-
-              for (let i = 1; i < rows.length; i++) {
-                  const row = rows[i];
-                  if (row.length <= Math.max(typeIndex, valIndex)) continue;
-
-                  const type = (row[typeIndex] || '').trim().toUpperCase();
-                  const valStr = row[valIndex] || '';
-                  const val = parseCurrency(valStr);
-
-                  totalSoh += val;
-                  if (sums.hasOwnProperty(type)) {
-                      sums[type] += val;
-                  }
-              }
-
-              updateDashboardUI(totalSoh, sums);
-          } catch (error) {
-              console.warn('Gagal sinkronisasi data online, menggunakan data cadangan lokal:', error);
-              // Fallback jika terjadi CORS / Offline
-              updateDashboardUI(fallbackData.totalSoh, fallbackData.sums);
-          } finally {
-              // Hentikan animasi spin
-              syncIcon.classList.remove('animate-spin-custom');
-              syncText.textContent = 'Sync Manual';
-          }
-      }
-
-      document.getElementById('sync-btn').addEventListener('click', syncData);
-
-      // Jalankan sinkronisasi pertama kali saat halaman dibuka
-      syncData();
-
-      // Atur sinkronisasi otomatis berjalan setiap 1 menit (60000 ms)
-      setInterval(syncData, 60000);
-
       // LOGIKA DINAMIS ACHIEVEMENT PROGRESS (PLAN 390/HARI, ACTUAL, GAP)
-      document.addEventListener('DOMContentLoaded', () => {
+      function renderAchievementProgressAndChart(actualTotal) {
           const startDate = new Date('2026-05-29T00:00:00');
           const today = new Date();
           
@@ -748,19 +687,48 @@
           // Variabel Data
           const dailyPlan = 390;
           const planKumulatif = daysPassed * dailyPlan; 
-          const actualTotal = 141; // Berdasarkan Actual statis (Bisa diganti var dinamis database)
           const gap = planKumulatif - actualTotal;
 
+          // Update UI Angka KPI Utama (Card 4 & Card 5)
+          const targetTotal = 9533;
+          const actualPct = ((actualTotal / targetTotal) * 100).toFixed(2);
+
+          const kpiActualReduksi = document.getElementById('kpi-actual-reduksi');
+          if (kpiActualReduksi) kpiActualReduksi.textContent = `${actualTotal.toLocaleString('id-ID')} Item`;
+
+          const kpiActualReduksiPct = document.getElementById('kpi-actual-reduksi-pct');
+          if (kpiActualReduksiPct) {
+              kpiActualReduksiPct.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualPct}% Dari Target`;
+          }
+
+          const kpiAchievementPct = document.getElementById('kpi-achievement-pct');
+          if (kpiAchievementPct) kpiAchievementPct.textContent = `${actualPct}%`;
+
+          const kpiAchievementRatio = document.getElementById('kpi-achievement-ratio');
+          if (kpiAchievementRatio) {
+              kpiAchievementRatio.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualTotal.toLocaleString('id-ID')} / ${targetTotal.toLocaleString('id-ID')} Item`;
+          }
+
           // Update UI Angka (3 Cards di atas Chart)
-          document.getElementById('plan-kumulatif-val').textContent = planKumulatif.toLocaleString('id-ID') + ' Item';
-          document.getElementById('actual-final-val').textContent = actualTotal.toLocaleString('id-ID') + ' Item';
+          const planKumVal = document.getElementById('plan-kumulatif-val');
+          if (planKumVal) planKumVal.textContent = `${planKumulatif.toLocaleString('id-ID')} Item`;
+
+          const actualFinalVal = document.getElementById('actual-final-val');
+          if (actualFinalVal) actualFinalVal.textContent = `${actualTotal.toLocaleString('id-ID')} Item`;
           
           const gapElem = document.getElementById('selisih-gap-val');
-          gapElem.textContent = gap.toLocaleString('id-ID') + ' Item';
-          gapElem.className = "text-2xl font-black text-white tracking-tight"; // Menjaga warna teks agar tetap konsisten dengan card
+          if (gapElem) {
+              gapElem.textContent = `${gap.toLocaleString('id-ID')} Item`;
+              gapElem.className = "text-2xl font-black text-white tracking-tight"; // Menjaga warna teks agar tetap konsisten dengan card
+          }
+
+          // Inisialisasi ulang Lucide agar ikon panah di Card 4 & 5 ter-render
+          lucide.createIcons();
 
           // MENGGAMBAR DIAGRAM GARIS SECARA DINAMIS
           const svg = document.getElementById('achievement-chart');
+          if (!svg) return;
+
           const yMax = 10000; // Skala Y Maximum
           const graphHeight = 240;
           const yOffset = 280;
@@ -807,7 +775,7 @@
           svgContent += `<path d="${planPath}" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="5,4" />`;
 
           // 4. Render Garis Actual 
-          let actualPath = `M 50 ${getY(141)}`; 
+          let actualPath = `M 50 ${getY(actualTotal)}`; 
           const currentX = 50 + (daysPassed - 1) * xStep;
           
           if (daysPassed > 1) {
@@ -818,6 +786,84 @@
           svgContent += `<circle cx="${currentX}" cy="${getY(actualTotal)}" r="4" fill="#1E293B" stroke="#fff" stroke-width="1.5" />`;
 
           svg.innerHTML = svgContent;
+      }
+
+      async function syncData() {
+          const syncIcon = document.getElementById('sync-icon');
+          const syncText = document.getElementById('sync-text');
+
+          // Aktifkan animasi spin
+          syncIcon.classList.add('animate-spin-custom');
+          syncText.textContent = 'Syncing...';
+
+          try {
+              const response = await fetch(SPREADSHEET_CSV_URL);
+              if (!response.ok) throw new Error('Gagal mengunduh CSV');
+              const csvText = await response.text();
+              const rows = parseCSV(csvText);
+
+              if (rows.length < 2) throw new Error('Format CSV tidak valid');
+
+              const headers = rows[0].map(h => h.trim().toLowerCase());
+              const typeIndex = headers.indexOf('material type');
+              const valIndex = headers.indexOf('value unrestricted');
+              const statusIndex = headers.findIndex(h => h.includes('status'));
+
+              if (typeIndex === -1 || valIndex === -1) {
+                  throw new Error('Kolom penting tidak ditemukan');
+              }
+
+              let sums = { 'SPRT': 0, 'FOGC': 0, 'MDLE': 0, 'TYRE': 0, 'GENS': 0 };
+              let totalSoh = 0;
+              let actualTotal = 0;
+
+              for (let i = 1; i < rows.length; i++) {
+                  const row = rows[i];
+                  if (row.length <= Math.max(typeIndex, valIndex)) continue;
+
+                  const type = (row[typeIndex] || '').trim().toUpperCase();
+                  const valStr = row[valIndex] || '';
+                  const val = parseCurrency(valStr);
+
+                  totalSoh += val;
+                  if (sums.hasOwnProperty(type)) {
+                      sums[type] += val;
+                  }
+
+                  // Hitung jumlah item dengan status "Close" secara dinamis
+                  if (statusIndex !== -1 && row[statusIndex]) {
+                      const statusVal = row[statusIndex].trim().toLowerCase();
+                      if (statusVal === 'close' || statusVal === 'closed') {
+                          actualTotal++;
+                      }
+                  }
+              }
+
+              updateDashboardUI(totalSoh, sums);
+              renderAchievementProgressAndChart(actualTotal);
+          } catch (error) {
+              console.warn('Gagal sinkronisasi data online, menggunakan data cadangan lokal:', error);
+              // Fallback jika terjadi CORS / Offline
+              updateDashboardUI(fallbackData.totalSoh, fallbackData.sums);
+              renderAchievementProgressAndChart(0); // Progress diset 0% jika offline/error/tidak ada data close
+          } finally {
+              // Hentikan animasi spin
+              syncIcon.classList.remove('animate-spin-custom');
+              syncText.textContent = 'Sync Manual';
+          }
+      }
+
+      document.getElementById('sync-btn').addEventListener('click', syncData);
+
+      // Jalankan sinkronisasi pertama kali saat halaman dimuat
+      document.addEventListener('DOMContentLoaded', () => {
+          updateDashboardUI(fallbackData.totalSoh, fallbackData.sums);
+          renderAchievementProgressAndChart(0); // Set default ke 0% saat pertama kali dimuat
+
+          syncData();
+
+          // Atur sinkronisasi otomatis berjalan setiap 1 menit (60000 ms)
+          setInterval(syncData, 60000);
       });
     </script>
 </body>

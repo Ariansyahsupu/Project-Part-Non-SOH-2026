@@ -25,6 +25,15 @@
     </script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@0.292.0"></script>
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-custom {
+            animation: spin 1s linear infinite;
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-[#F8FAFC] font-sans pb-12">
 
@@ -55,9 +64,18 @@
                     </p>
                 </div>
             </div>
-            <div class="bg-[#1E293B] text-white px-4 py-1.5 rounded-sm flex items-center gap-2 text-xs font-bold shadow-md">
-                <div class="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></div>
-                <span>STATUS: ON TRACK</span>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span id="last-sync-time" class="text-[10px] text-slate-400 font-bold hidden md:inline">Last Sync: -</span>
+                    <button id="sync-btn" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-sm text-xs font-bold shadow-sm flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="refresh-cw" id="sync-icon" class="h-3.5 w-3.5"></i>
+                        <span id="sync-text">Sync Manual</span>
+                    </button>
+                </div>
+                <div class="bg-[#1E293B] text-white px-4 py-1.5 rounded-sm flex items-center gap-2 text-xs font-bold shadow-md">
+                    <div class="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></div>
+                    <span>STATUS: ON TRACK</span>
+                </div>
             </div>
         </header>
 
@@ -67,7 +85,7 @@
             <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#0F172A] border-t-[#1E293B]">
                 <div class="mb-4">
                     <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Total SOH (Sistem Awal)</p>
-                    <h3 class="text-3xl font-black text-white tracking-tight">Rp 12.34 M</h3>
+                    <h3 id="total-soh-val" class="text-3xl font-black text-white tracking-tight">Rp 12.34 M</h3>
                 </div>
                 <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1337344623#gid=1337344623" target="_blank" rel="noreferrer" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3 hover:text-white transition-colors cursor-pointer" title="Lihat data di Google Sheets">
                     <i data-lucide="external-link" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
@@ -141,50 +159,50 @@
                         <div class="relative">
                             <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
                                 <span>SPRT (Spare Parts)</span>
-                                <span class="font-mono text-slate-500">Sistem (First Diff): 6.97 M</span>
+                                <span id="sprt-sistem-text" class="font-mono text-slate-500">Sistem (First Diff): 6.97 M</span>
                             </div>
                             <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
-                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 6.97 M">Sistem: 6.97 M</div>
+                                <div id="sprt-bar" class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold" title="Sistem: 6.97 M" style="width: 100%">Sistem: 6.97 M</div>
                             </div>
                         </div>
                         <!-- FOGC -->
                         <div class="relative">
                             <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
                                 <span>FOGC</span>
-                                <span class="font-mono text-slate-500">Sistem (First Diff): 3.07 M</span>
+                                <span id="fogc-sistem-text" class="font-mono text-slate-500">Sistem (First Diff): 3.07 M</span>
                             </div>
                             <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
-                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 3.07 M">Sistem: 3.07 M</div>
+                                <div id="fogc-bar" class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold" title="Sistem: 3.07 M" style="width: 44%">Sistem: 3.07 M</div>
                             </div>
                         </div>
                         <!-- MDLE -->
                         <div class="relative">
                             <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
                                 <span>MDLE</span>
-                                <span class="font-mono text-slate-500">Sistem (First Diff): 1.64 M</span>
+                                <span id="mdle-sistem-text" class="font-mono text-slate-500">Sistem (First Diff): 1.64 M</span>
                             </div>
                             <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
-                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 1.64 M">Sistem: 1.64 M</div>
+                                <div id="mdle-bar" class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold" title="Sistem: 1.64 M" style="width: 23.5%">Sistem: 1.64 M</div>
                             </div>
                         </div>
                         <!-- TYRE -->
                         <div class="relative">
                             <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
                                 <span>TYRE</span>
-                                <span class="font-mono text-slate-500">Sistem (First Diff): 473.6 Jt</span>
+                                <span id="tyre-sistem-text" class="font-mono text-slate-500">Sistem (First Diff): 473.6 Jt</span>
                             </div>
                             <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
-                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 473.6 Jt">Sistem: 473.6 Jt</div>
+                                <div id="tyre-bar" class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold" title="Sistem: 473.6 Jt" style="width: 6.8%">Sistem: 473.6 Jt</div>
                             </div>
                         </div>
                         <!-- GENS -->
                         <div class="relative">
                             <div class="flex justify-between text-xs mb-1.5 font-bold text-slate-700 uppercase">
                                 <span>GENS</span>
-                                <span class="font-mono text-slate-500">Sistem (First Diff): 187.9 Jt</span>
+                                <span id="gens-sistem-text" class="font-mono text-slate-500">Sistem (First Diff): 187.9 Jt</span>
                             </div>
                             <div class="w-full h-7 bg-[#F1F5F9] rounded-sm flex overflow-hidden border border-gray-100">
-                                <div class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold w-full" title="Sistem: 187.9 Jt">Sistem: 187.9 Jt</div>
+                                <div id="gens-bar" class="bg-[#334155] flex items-center justify-center text-[10px] text-white font-extrabold" title="Sistem: 187.9 Jt" style="width: 2.7%">Sistem: 187.9 Jt</div>
                             </div>
                         </div>
                     </div>
@@ -448,7 +466,6 @@
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="p-3 font-extrabold text-[#1D2B36] border-r border-slate-100">Fase 6: Approval & Pengesahan</td>
                             <td class="p-3 font-bold text-slate-800 border-r border-slate-100">Sign-off & Closing</td>
-                            <td class="p-3 text-slate-600 border-r border-slate-100 leading-relaxed">Rapat finalisasi proyek & pengesahan laporan Final Difference / Write-off</td>
                             <td class="p-3 text-center font-bold text-slate-800 border-r border-slate-100">2 Hari</td>
                             <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">28 Jun 2026</td>
                             <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r border-slate-100">29 Jun 2026</td>
@@ -500,7 +517,10 @@
                             <i data-lucide="database" class="text-slate-300" style="width: 20px; height: 20px;"></i>
                         </div>
                         <div class="font-black text-xs uppercase tracking-wider">Admin SAP</div>
-                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold">2 Personel</div>
+                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold flex items-center justify-center gap-1.5">
+                            <span>2 Personel</span>
+                            <span class="bg-red-500/20 text-red-300 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wide uppercase">Vacant</span>
+                        </div>
                         <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-600 pt-2 leading-relaxed font-semibold">
                             Pemasukan Data ke SAP, Penyandian Selisih First Difference & Update Status SOH Secara Paralel
                         </div>
@@ -512,7 +532,10 @@
                             <i data-lucide="file-text" class="text-slate-300" style="width: 20px; height: 20px;"></i>
                         </div>
                         <div class="font-black text-xs uppercase tracking-wider">Document Controller</div>
-                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold">1 Personel</div>
+                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold flex items-center justify-center gap-1.5">
+                            <span>1 Personel</span>
+                            <span class="bg-red-500/20 text-red-300 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wide uppercase">Vacant</span>
+                        </div>
                         <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-600 pt-2 leading-relaxed font-semibold">
                             Validasi Keabsahan Dokumen Fisik, Rekonsiliasi Lapangan & Penyusunan Berita Acara (BA) Proyek
                         </div>
@@ -529,7 +552,10 @@
                             <i data-lucide="users" class="text-slate-300" style="width: 20px; height: 20px;"></i>
                         </div>
                         <div class="font-black text-xs uppercase tracking-wider">Tim Lapangan (Verifikator Fisik)</div>
-                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold">6 Personel</div>
+                        <div class="text-[10px] text-slate-300 mt-0.5 font-bold flex items-center justify-center gap-1.5">
+                            <span>6 Personel</span>
+                            <span class="bg-red-500/20 text-red-300 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wide uppercase">Vacant</span>
+                        </div>
                         <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-600 pt-2 leading-relaxed font-semibold">
                             Eksekusi Stock Take, Penghitungan Fisik SOH & Non-SOH, Pelabelan, Segregasi, serta Pemindahan Lokasi
                         </div>
@@ -543,6 +569,167 @@
     <!-- Initialize Icons -->
     <script>
       lucide.createIcons();
+
+      // LOGIKA INTEGRASI REAL-TIME DENGAN GOOGLE SPREADSHEET
+      const SPREADSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/export?format=csv&gid=1337344623';
+
+      // Fallback Data Riil
+      const fallbackData = {
+          totalSoh: 12341599349,
+          sums: {
+              'SPRT': 6971709767,
+              'FOGC': 3068232653,
+              'MDLE': 1640087997,
+              'TYRE': 473652010,
+              'GENS': 187916922
+          }
+      };
+
+      function formatMiliarJutaSimple(val) {
+          if (val >= 1000000000) {
+              return (val / 1000000000).toFixed(2) + ' M';
+          } else {
+              return (val / 1000000).toFixed(1) + ' Jt';
+          }
+      }
+
+      function parseCurrency(val) {
+          if (!val) return 0;
+          let clean = val.trim().replace(/[^0-9,.-]/g, '');
+          if (clean.includes(',') && clean.includes('.')) {
+              if (clean.indexOf(',') < clean.indexOf('.')) {
+                  clean = clean.replace(/,/g, '');
+              } else {
+                  clean = clean.replace(/\./g, '').replace(/,/g, '.');
+              }
+          } else if (clean.includes(',')) {
+              clean = clean.replace(/,/g, '.');
+          }
+          const num = parseFloat(clean);
+          return isNaN(num) ? 0 : num;
+      }
+
+      function parseCSV(text) {
+          let lines = [];
+          let row = [""];
+          let inQuotes = false;
+          for (let i = 0; i < text.length; i++) {
+              let c = text[i];
+              let next = text[i+1];
+              if (c === '"') {
+                  if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
+                  else { inQuotes = !inQuotes; }
+              } else if (c === ',' && !inQuotes) {
+                  row.push('');
+              } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                  if (c === '\r' && next === '\n') { i++; }
+                  lines.push(row);
+                  row = [''];
+              } else {
+                  row[row.length - 1] += c;
+              }
+          }
+          if (row.length > 1 || row[0] !== '') lines.push(row);
+          return lines;
+      }
+
+      function updateDashboardUI(totalSoh, sums) {
+          // Card 1: Total SOH
+          const sohInM = (totalSoh / 1000000000).toFixed(2);
+          document.getElementById('total-soh-val').textContent = `Rp ${sohInM} M`;
+
+          // Hitung Persentase & Update Progress Bar (Analisa First Difference)
+          const items = ['SPRT', 'FOGC', 'MDLE', 'TYRE', 'GENS'];
+          let maxVal = Math.max(...Object.values(sums));
+          if (maxVal === 0) maxVal = 1;
+
+          items.forEach(item => {
+              const val = sums[item] || 0;
+              const formattedVal = formatMiliarJutaSimple(val);
+
+              // Update Text di Atas Bar
+              const textElem = document.getElementById(`${item.toLowerCase()}-sistem-text`);
+              if (textElem) {
+                  textElem.textContent = `Sistem (First Diff): ${formattedVal}`;
+              }
+
+              // Update Lebar Bar & Teks di Dalam Bar
+              const barElem = document.getElementById(`${item.toLowerCase()}-bar`);
+              if (barElem) {
+                  barElem.textContent = `Sistem: ${formattedVal}`;
+                  const percentage = (val / maxVal) * 100;
+                  barElem.style.width = `${percentage}%`;
+                  barElem.setAttribute('title', `Sistem: ${formattedVal}`);
+              }
+          });
+
+          // Tandai waktu berhasil sinkronisasi terakhir
+          const now = new Date();
+          const timeStr = now.toTimeString().split(' ')[0];
+          document.getElementById('last-sync-time').textContent = `Last Sync: ${timeStr}`;
+          document.getElementById('last-sync-time').classList.remove('hidden');
+      }
+
+      async function syncData() {
+          const syncIcon = document.getElementById('sync-icon');
+          const syncText = document.getElementById('sync-text');
+
+          // Aktifkan animasi spin
+          syncIcon.classList.add('animate-spin-custom');
+          syncText.textContent = 'Syncing...';
+
+          try {
+              const response = await fetch(SPREADSHEET_CSV_URL);
+              if (!response.ok) throw new Error('Gagal mengunduh CSV');
+              const csvText = await response.text();
+              const rows = parseCSV(csvText);
+
+              if (rows.length < 2) throw new Error('Format CSV tidak valid');
+
+              const headers = rows[0].map(h => h.trim().toLowerCase());
+              const typeIndex = headers.indexOf('material type');
+              const valIndex = headers.indexOf('value unrestricted');
+
+              if (typeIndex === -1 || valIndex === -1) {
+                  throw new Error('Kolom penting tidak ditemukan');
+              }
+
+              let sums = { 'SPRT': 0, 'FOGC': 0, 'MDLE': 0, 'TYRE': 0, 'GENS': 0 };
+              let totalSoh = 0;
+
+              for (let i = 1; i < rows.length; i++) {
+                  const row = rows[i];
+                  if (row.length <= Math.max(typeIndex, valIndex)) continue;
+
+                  const type = (row[typeIndex] || '').trim().toUpperCase();
+                  const valStr = row[valIndex] || '';
+                  const val = parseCurrency(valStr);
+
+                  totalSoh += val;
+                  if (sums.hasOwnProperty(type)) {
+                      sums[type] += val;
+                  }
+              }
+
+              updateDashboardUI(totalSoh, sums);
+          } catch (error) {
+              console.warn('Gagal sinkronisasi data online, menggunakan data cadangan lokal:', error);
+              // Fallback jika terjadi CORS / Offline
+              updateDashboardUI(fallbackData.totalSoh, fallbackData.sums);
+          } finally {
+              // Hentikan animasi spin
+              syncIcon.classList.remove('animate-spin-custom');
+              syncText.textContent = 'Sync Manual';
+          }
+      }
+
+      document.getElementById('sync-btn').addEventListener('click', syncData);
+
+      // Jalankan sinkronisasi pertama kali saat halaman dibuka
+      syncData();
+
+      // Atur sinkronisasi otomatis berjalan setiap 1 menit (60000 ms)
+      setInterval(syncData, 60000);
 
       // LOGIKA DINAMIS ACHIEVEMENT PROGRESS (PLAN 390/HARI, ACTUAL, GAP)
       document.addEventListener('DOMContentLoaded', () => {

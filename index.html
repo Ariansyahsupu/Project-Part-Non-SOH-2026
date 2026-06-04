@@ -181,8 +181,9 @@
                     <!-- Card 1 -->
                     <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#0B1329] border-t-[#1C2541]">
                         <div class="mb-4">
-                            <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Total SOH (Sistem Awal)</p>
+                            <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Target Reduksi</p>
                             <h3 id="total-soh-val" class="text-3xl font-black text-white tracking-tight">Rp 0 M</h3>
+                            <p id="target-reduksi-val" class="text-[10px] font-bold text-yellow-400 uppercase tracking-wider mt-1.5">0 Item</p>
                         </div>
                         <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1375266193#gid=1375266193" target="_blank" rel="noreferrer" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3 hover:text-white transition-colors cursor-pointer" title="Lihat data di Google Sheets">
                             <i data-lucide="external-link" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
@@ -212,22 +213,23 @@
                             Item Part Non-SOH
                         </a>
                     </div>
-                    <!-- Card 4 -->
+                    <!-- Card 4 (General Stock Take) -->
                     <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#3B5270] border-t-[#475E80]">
                         <div class="mb-4">
-                            <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Target Reduksi</p>
-                            <h3 id="target-reduksi-val" class="text-3xl font-black text-white tracking-tight">0 Item</h3>
+                            <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Total Gen. Stock Take</p>
+                            <h3 id="general-stock-take-val" class="text-3xl font-black text-white tracking-tight">0 Item</h3>
                         </div>
-                        <div class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3">
-                            <i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
-                            Target Tahun 2026
-                        </div>
+                        <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=2011878581#gid=2011878581" target="_blank" rel="noreferrer" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide border-t border-white/10 pt-3 hover:text-white transition-colors cursor-pointer">
+                            <i data-lucide="external-link" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
+                            Data MB52
+                        </a>
                     </div>
                     <!-- Card 5 -->
                     <div class="p-5 rounded-sm border-t-4 shadow-md flex flex-col justify-between text-white bg-[#475E80] border-t-[#687D94]">
                         <div class="mb-4">
                             <p class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1.5">Actual Reduksi</p>
                             <h3 id="kpi-actual-reduksi" class="text-3xl font-black text-white tracking-tight">0 Item</h3>
+                            <p id="kpi-actual-reduksi-val" class="text-[10px] font-bold text-green-300 uppercase tracking-wider mt-1.5">Rp 0</p>
                         </div>
                         <div class="space-y-1.5 border-t border-white/10 pt-3">
                             <div id="kpi-actual-reduksi-pct" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide">
@@ -350,21 +352,26 @@
                             </h2>
                             
                             <!-- 3 Box Metrics Dynamic -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                                 <div class="p-3 rounded-sm border-t-4 shadow-sm flex flex-col justify-between text-white bg-[#0B1329] border-t-[#1C2541]">
                                     <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Plan (Kumulatif)</div>
                                     <div class="text-2xl font-black text-white tracking-tight" id="plan-kumulatif-val">0 Item</div>
                                     <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Target +390/Hari</div>
                                 </div>
                                 <div class="p-3 rounded-sm border-t-4 shadow-sm flex flex-col justify-between text-white bg-[#1C2541] border-t-[#2A446C]">
-                                    <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Actual (Final)</div>
+                                    <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Actual (Reduksi)</div>
                                     <div class="text-2xl font-black text-white tracking-tight" id="actual-final-val">0 Item</div>
                                     <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Total Item Close</div>
+                                </div>
+                                <div class="p-3 rounded-sm border-t-4 shadow-sm flex flex-col justify-between text-white bg-[#3B5270] border-t-[#475E80]">
+                                    <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Actual (Gen. Stock Take)</div>
+                                    <div class="text-2xl font-black text-white tracking-tight" id="actual-gen-stock-take-val">0 Item</div>
+                                    <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Dari Header Tanggal</div>
                                 </div>
                                 <div class="p-3 rounded-sm border-t-4 shadow-sm flex flex-col justify-between text-white bg-[#2A446C] border-t-[#475E80]">
                                     <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Selisih (Gap)</div>
                                     <div class="text-2xl font-black text-white tracking-tight" id="selisih-gap-val">0 Item</div>
-                                    <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Plan - Actual</div>
+                                    <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Plan - Actual Reduksi</div>
                                 </div>
                             </div>
 
@@ -374,16 +381,17 @@
                             </div>
 
                             <!-- Legends -->
-                            <div class="flex justify-center text-[10px] text-slate-500 font-bold uppercase mt-8 gap-6">
+                            <div class="flex justify-center text-[10px] text-slate-500 font-bold uppercase mt-8 gap-6 flex-wrap">
                                 <span class="flex items-center gap-2"><div class="w-4 border-t-2 border-dashed border-gray-400"></div> Target Rencana (+390 Item/Hari)</span>
-                                <span class="flex items-center gap-2"><div class="w-3 h-3 bg-[#1C2541] rounded-sm"></div> Akumulasi Item Close</span>
+                                <span class="flex items-center gap-2"><div class="w-3 h-3 bg-[#1C2541] rounded-sm"></div> Actual Reduksi</span>
+                                <span class="flex items-center gap-2"><div class="w-3 h-3 bg-[#3B5270] rounded-sm"></div> Actual Gen. Stock Take</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Right Column -->
-                    <div class="lg:col-span-1">
-                        <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm h-full">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm">
                             <h2 class="text-sm font-black text-[#1D2B36] uppercase tracking-wider border-b border-gray-100 pb-3 mb-6">
                                 <i data-lucide="clock" class="text-[#0B1329]" style="width: 18px; height: 18px; vertical-align: text-bottom;"></i>
                                 Alur Progres Proyek
@@ -481,6 +489,25 @@
                                     </div>
                                 </div>
 
+                            </div>
+                        </div>
+
+                        <!-- Card Diagram Lingkaran Monitoring PDTY MP -->
+                        <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm">
+                            <h2 class="text-sm font-black text-[#1D2B36] uppercase tracking-wider border-b border-gray-100 pb-3 mb-6 flex items-center gap-2">
+                                <i data-lucide="pie-chart" class="text-[#0B1329]" style="width: 18px; height: 18px;"></i>
+                                Monitoring PDTY MP Bulan Juni
+                            </h2>
+                            <p class="text-[11px] text-slate-500 mb-6 font-semibold text-center leading-relaxed">
+                                Distribusi beban kerja & efektivitas pelaksana kalibrasi
+                            </p>
+                            <div class="flex justify-center mb-6">
+                                <div class="relative w-48 h-48">
+                                    <svg id="pdty-pie-chart" viewBox="-100 -100 200 200" class="w-full h-full transform -rotate-90"></svg>
+                                </div>
+                            </div>
+                            <div id="pdty-legend" class="space-y-2">
+                                <!-- Legend disuntikkan dari JS -->
                             </div>
                         </div>
                     </div>
@@ -1001,8 +1028,11 @@
       const PUB_BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ89SrRMBq0EYLeMFFTMAWbhVl-pzj4x9xZjW73nRw4FCTdIOGYplmkpHkKaf3VRRVnlqGjQWb8fcet/pub';
       const SOH_URL = `${PUB_BASE_URL}?gid=1375266193&single=true&output=csv`;
       const KANDIDAT_URL = `${PUB_BASE_URL}?gid=92855202&single=true&output=csv`;
-      const PROGRESS_URL = `${PUB_BASE_URL}?gid=911049486&single=true&output=csv`;
+      const PROGRESS_URL = `${PUB_BASE_URL}?gid=1021972219&single=true&output=csv`;
       const POTENSI_URL = `${PUB_BASE_URL}?gid=909242961&single=true&output=csv`;
+      const MB52_URL = `${PUB_BASE_URL}?gid=2011878581&single=true&output=csv`;
+      // GID untuk PDTY MP
+      const PDTY_URL = `${PUB_BASE_URL}?gid=1630676217&single=true&output=csv`;
 
       // Fallback Data Riil jika koneksi terkendala / offline
       const fallbackData = {
@@ -1024,7 +1054,11 @@
               'GENS': 0
           },
           potensiTotal: 14200000000,
-          dailyActuals: new Array(21).fill(0)
+          generalStockTakeTotal: 12500,
+          dailyActuals: new Array(21).fill(0),
+          dailyGenStockTakeActuals: new Array(21).fill(0),
+          actualGenStockTakeTotal: 0,
+          pdtyData: { "FATHIKIN": 125, "SLAMET": 90, "WARDANI": 75, "LAINNYA": 45 }
       };
 
       function formatMiliarJutaSimple(val) {
@@ -1105,15 +1139,34 @@
           return lines;
       }
 
-      function updateDashboardUI(totalSoh, sumsSistem, sumsProgress, potensiTotal = 0) {
+      function updateDashboardUI(totalSoh, sumsSistem, sumsProgress, potensiTotal = 0, generalStockTakeTotal = 0) {
+          const selectedSite = document.getElementById('site-filter').value;
+
           // Card 1
-          const sohInM = (totalSoh / 1000000000).toFixed(2);
-          document.getElementById('total-soh-val').textContent = `Rp ${sohInM} M`;
+          if (selectedSite !== 'ALL' && selectedSite.toUpperCase() !== 'DC PALARAN') {
+              document.getElementById('total-soh-val').textContent = `Rp 0 M`;
+          } else {
+              const sohInM = (totalSoh / 1000000000).toFixed(2);
+              document.getElementById('total-soh-val').textContent = `Rp ${sohInM} M`;
+          }
+
+          // Update General Stock Take (Card 4)
+          document.querySelectorAll('[id="general-stock-take-val"]').forEach(el => {
+              el.textContent = `${generalStockTakeTotal.toLocaleString('id-ID')} Item`;
+          });
 
           // Card 2
           let totalProgressValue = Object.values(sumsProgress).reduce((a, b) => a + b, 0);
           const progressInJt = (totalProgressValue / 1000000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
           document.getElementById('total-progress-val').textContent = `Rp ${progressInJt} Jt`;
+
+          // Update Value Actual Reduksi (Card 5)
+          const actualReduksiValStr = totalProgressValue >= 1000000000 
+              ? `Rp ${(totalProgressValue / 1000000000).toFixed(2)} M` 
+              : `Rp ${progressInJt} Jt`;
+          document.querySelectorAll('[id="kpi-actual-reduksi-val"]').forEach(el => {
+              el.textContent = actualReduksiValStr;
+          });
 
           // Potensi Reduce Update
           document.querySelectorAll('[id="potensi-reduce-val"]').forEach(el => {
@@ -1178,7 +1231,8 @@
           document.getElementById('last-sync-time').classList.remove('hidden');
       }
 
-      function renderAchievementProgressAndChart(actualTotal, targetTotal, kandidatTotal, dailyActuals = []) {
+      function renderAchievementProgressAndChart(actualTotal, targetTotal, kandidatTotal, dailyActuals = [], actualGenStockTakeTotal = 0, dailyGenStockTakeActuals = []) {
+          const selectedSite = document.getElementById('site-filter').value;
           const startDate = new Date('2026-05-29T00:00:00');
           const today = new Date();
           
@@ -1195,7 +1249,12 @@
 
           const actualPct = targetTotal > 0 ? ((actualTotal / targetTotal) * 100).toFixed(2) : '0.00';
 
-          document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `${targetTotal.toLocaleString('id-ID')} Item`);
+          if (selectedSite !== 'ALL' && selectedSite.toUpperCase() !== 'DC PALARAN') {
+              document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `0 Item`);
+          } else {
+              document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `${targetTotal.toLocaleString('id-ID')} Item`);
+          }
+          
           document.querySelectorAll('[id="kpi-kandidat-kalibrasi"]').forEach(el => el.textContent = `${kandidatTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="kpi-actual-reduksi"]').forEach(el => el.textContent = `${actualTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="kpi-actual-reduksi-pct"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualPct}% Dari Target`);
@@ -1203,6 +1262,7 @@
           document.querySelectorAll('[id="kpi-achievement-ratio"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualTotal.toLocaleString('id-ID')} / ${targetTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="plan-kumulatif-val"]').forEach(el => el.textContent = `${planKumulatif.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="actual-final-val"]').forEach(el => el.textContent = `${actualTotal.toLocaleString('id-ID')} Item`);
+          document.querySelectorAll('[id="actual-gen-stock-take-val"]').forEach(el => el.textContent = `${actualGenStockTakeTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="selisih-gap-val"]').forEach(el => {
               el.textContent = `${gap.toLocaleString('id-ID')} Item`;
               el.className = "text-2xl font-black text-white tracking-tight"; 
@@ -1278,9 +1338,94 @@
           svgContent += `<path d="${actualPath}" fill="none" stroke="#1C2541" stroke-width="3" />`;
           svgContent += `<circle cx="${currentX}" cy="${getY(cumulativeActual)}" r="4" fill="#1C2541" stroke="#fff" stroke-width="1.5" />`;
 
+          let genPath = `M 50 ${getY(0)}`; 
+          let cumulativeGen = 0;
+          let currentXGen = 50;
+
+          if (dailyGenStockTakeActuals && dailyGenStockTakeActuals.length > 0) {
+              for (let i = 0; i < daysPassed; i++) {
+                  cumulativeGen += (dailyGenStockTakeActuals[i] || 0);
+                  currentXGen = 50 + i * xStep;
+                  if (i === 0) {
+                      genPath = `M ${currentXGen} ${getY(cumulativeGen)}`;
+                  } else {
+                      genPath += ` L ${currentXGen} ${getY(cumulativeGen)}`;
+                  }
+              }
+          } else {
+              currentXGen = 50 + (daysPassed - 1) * xStep;
+              if (daysPassed > 1) {
+                  genPath += ` L ${currentXGen} ${getY(actualGenStockTakeTotal)}`;
+              }
+              cumulativeGen = actualGenStockTakeTotal;
+          }
+          
+          svgContent += `<path d="${genPath}" fill="none" stroke="#3B5270" stroke-width="3" />`;
+          svgContent += `<circle cx="${currentXGen}" cy="${getY(cumulativeGen)}" r="4" fill="#3B5270" stroke="#fff" stroke-width="1.5" />`;
+
           document.querySelectorAll('[id="achievement-chart"]').forEach(svg => {
               svg.innerHTML = svgContent;
           });
+      }
+
+      function renderPdtyChart(data) {
+          let svg = '';
+          let total = Object.values(data).reduce((a, b) => a + b, 0);
+          let startAngle = 0;
+          let colors = ['#0B1329', '#1C2541', '#2A446C', '#475E80', '#687D94', '#9FB3C8', '#D9E2EC'];
+          let colorIdx = 0;
+          let legendHTML = '';
+
+          if (total === 0) {
+              document.getElementById('pdty-pie-chart').innerHTML = `<circle cx="0" cy="0" r="100" fill="#f1f5f9" />`;
+              document.getElementById('pdty-legend').innerHTML = `<p class="text-xs text-center text-slate-500">Belum ada data pelaksana</p>`;
+              return;
+          }
+
+          const sortedData = Object.entries(data).sort((a, b) => b[1] - a[1]);
+
+          for (const [key, val] of sortedData) {
+              let sliceAngle = (val / total) * 2 * Math.PI;
+              let endAngle = startAngle + sliceAngle;
+              
+              let x1 = 100 * Math.cos(startAngle);
+              let y1 = 100 * Math.sin(startAngle);
+              let x2 = 100 * Math.cos(endAngle);
+              let y2 = 100 * Math.sin(endAngle);
+              
+              let largeArcFlag = sliceAngle > Math.PI ? 1 : 0;
+              
+              if (sliceAngle >= 2 * Math.PI - 0.001) {
+                   svg += `<circle cx="0" cy="0" r="100" fill="${colors[colorIdx]}" />`;
+              } else {
+                   let pathData = [
+                       `M 0 0`,
+                       `L ${x1} ${y1}`,
+                       `A 100 100 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                       `Z`
+                   ].join(' ');
+                   svg += `<path d="${pathData}" fill="${colors[colorIdx]}" stroke="#ffffff" stroke-width="1.5" class="transition-all hover:opacity-80 cursor-pointer" />`;
+              }
+              
+              legendHTML += `
+                  <div class="flex items-center justify-between text-[10px] font-bold border-b border-slate-100 pb-1.5 last:border-0">
+                      <div class="flex items-center gap-2">
+                          <div class="w-2.5 h-2.5 rounded-sm" style="background-color: ${colors[colorIdx]}"></div>
+                          <span class="text-slate-600 uppercase">${key}</span>
+                      </div>
+                      <span class="text-[#0B1329] bg-slate-50 px-1.5 py-0.5 rounded border border-gray-100">${val.toLocaleString('id-ID')} Item (${((val/total)*100).toFixed(1)}%)</span>
+                  </div>
+              `;
+              
+              startAngle = endAngle;
+              colorIdx = (colorIdx + 1) % colors.length;
+          }
+
+          const svgEl = document.getElementById('pdty-pie-chart');
+          const legendEl = document.getElementById('pdty-legend');
+          
+          if(svgEl) svgEl.innerHTML = svg;
+          if(legendEl) legendEl.innerHTML = legendHTML;
       }
 
       async function syncData() {
@@ -1292,24 +1437,27 @@
           if (syncText) syncText.textContent = 'Syncing...';
 
           try {
-              const [sohRes, kandidatRes, progressRes, potensiRes] = await Promise.all([
+              const [sohRes, kandidatRes, progressRes, potensiRes, mb52Res] = await Promise.all([
                   fetch(SOH_URL),
                   fetch(KANDIDAT_URL),
                   fetch(PROGRESS_URL),
-                  fetch(POTENSI_URL)
+                  fetch(POTENSI_URL),
+                  fetch(MB52_URL)
               ]);
 
-              if (!sohRes.ok || !kandidatRes.ok || !progressRes.ok || !potensiRes.ok) throw new Error('Gagal mengunduh CSV dari link PubHTML');
+              if (!sohRes.ok || !kandidatRes.ok || !progressRes.ok || !potensiRes.ok || !mb52Res.ok) throw new Error('Gagal mengunduh CSV dari link PubHTML');
               
               const sohText = await sohRes.text();
               const kandidatText = await kandidatRes.text();
               const progressText = await progressRes.text();
               const potensiText = await potensiRes.text();
+              const mb52Text = await mb52Res.text();
 
               const rowsSoh = parseCSV(sohText);
               const rowsKandidat = parseCSV(kandidatText);
               const rowsProgress = parseCSV(progressText);
               const rowsPotensi = parseCSV(potensiText);
+              const rowsMb52 = parseCSV(mb52Text);
 
               // PARSING TAB 1: SOH Sistem (Total SOH, Target Reduksi & Price Calculation)
               const headers1 = rowsSoh[0].map(h => h.trim().toLowerCase());
@@ -1416,33 +1564,147 @@
                   }
               }
 
-              // PARSING TAB 3: Progress Aktual (Undetected / Non-SOH berdasarkan Alarm x Actual Qty x Price)
+              // PARSING TAB 3: Progress Aktual (Undetected / Non-SOH berdasarkan Qty Over Stok x Ress Value)
               const headers2 = rowsProgress[0].map(h => h.trim().toLowerCase());
-              const kodeMaterialIndex2 = headers2.findIndex(h => h === 'kode material' || h === 'material');
+              const kodeMaterialIndex2 = headers2.findIndex(h => h === 'kode material' || h === 'material' || h.includes('total material'));
               const typeIndex2 = headers2.findIndex(h => h.includes('material type') || h.includes('material typel'));
-              const alarmIndex2 = headers2.findIndex(h => h === 'alarm' || h.includes('alarm'));
-              const actualIndex2 = headers2.findIndex(h => h === 'actual' || h.includes('actual'));
+              const qtyOverStokIndex = headers2.findIndex(h => h.includes('qty over') || h.includes('over stok') || h.includes('over stock'));
+              const ressValueIndex = headers2.findIndex(h => h.includes('ress value') || h === 'price' || h.includes('harga'));
+              const pelaksanaIndex = headers2.findIndex(h => h.includes('pelaksana') || h.includes('pic') || h.includes('nama') || h.includes('eksekutor'));
+              const tglIndexProgress = headers2.findIndex(h => h === 'tanggal' || h.includes('tanggal') || h.includes('tgl') || h.includes('date'));
+              const totalIndexProgress = headers2.findIndex(h => h === 'total' || h === 'total ' || h === ' total ');
 
               let sumsProgress = { 'SPRT': 0, 'FOGC': 0, 'MDLE': 0, 'TYRE': 0, 'GENS': 0 };
+              let extractedPdtyData = {};
+
+              // RESET actualTotal agar dihitung berdasarkan List Actual Reduksi (Tab 3) sesuai site kolom
+              actualTotal = 0; 
+              dailyActuals.fill(0);
+              
+              let actualGenStockTakeTotal = 0;
+              let dailyGenStockTakeActuals = new Array(21).fill(0);
+
+              // Identifikasi kolom Site Matrix pada Sheet
+              const siteColumnsMap = {
+                  'COMEX MAS': headers2.findIndex(h => h.trim() === 'comex mas' || h.includes('comex mas')),
+                  'MAS': headers2.findIndex(h => h.trim() === 'mas' || (h.includes('mas') && !h.includes('comex'))),
+                  'AGM': headers2.findIndex(h => h.trim() === 'agm' || h.includes('agm')),
+                  'BSSR': headers2.findIndex(h => h.trim() === 'bssr' || h.includes('bssr')),
+                  'TAJ': headers2.findIndex(h => h.trim() === 'taj' || h.includes('taj')),
+                  'BYN': headers2.findIndex(h => h.trim() === 'byn' || h.includes('byn')),
+                  'MBL HAULING': headers2.findIndex(h => h.trim() === 'mbl hauling' || h.includes('hauling')),
+                  'MBL MINING': headers2.findIndex(h => h.trim() === 'mbl mining' || h.includes('mining'))
+              };
+              const hasMatrixColumns = Object.values(siteColumnsMap).some(idx => idx !== -1);
 
               for (let j = 1; j < rowsProgress.length; j++) {
                   const row2 = rowsProgress[j];
                   if (!row2 || row2.length === 0 || (row2.length === 1 && row2[0].trim() === '')) continue;
 
-                  if (!rowMatchesSite(row2, headers2, selectedSite)) continue;
+                  let validForSite = false;
+                  let itemQty = 0;
+
+                  const overStokStr = qtyOverStokIndex !== -1 ? (row2[qtyOverStokIndex] || '') : '';
+                  const overStokQty = parseCurrency(overStokStr);
+                  const totalStr = totalIndexProgress !== -1 ? (row2[totalIndexProgress] || '') : '';
+                  const totalQty = parseCurrency(totalStr);
+
+                  if (hasMatrixColumns) {
+                      // Hitung dari kolom matrix per Site
+                      if (selectedSite === 'ALL') {
+                          let totalMatrixQty = 0;
+                          for (const site in siteColumnsMap) {
+                              const idx = siteColumnsMap[site];
+                              if (idx !== -1) totalMatrixQty += parseCurrency(row2[idx]);
+                          }
+                          itemQty = totalMatrixQty;
+                          if (itemQty >= 1) validForSite = true;
+                      } else {
+                          const idx = siteColumnsMap[selectedSite];
+                          if (idx !== -1) {
+                              itemQty = parseCurrency(row2[idx]);
+                              if (itemQty >= 1) validForSite = true;
+                          }
+                      }
+                  } else {
+                      // Fallback filtering jika format sheet bukan matrix
+                      if (rowMatchesSite(row2, headers2, selectedSite)) {
+                          itemQty = overStokQty;
+                          if (itemQty >= 1) validForSite = true;
+                      }
+                  }
+
+                  let hasDate = false;
+                  let dayIndex = 0; 
+                  if (tglIndexProgress !== -1 && row2[tglIndexProgress]) {
+                      const tglStr = row2[tglIndexProgress].trim();
+                      if (tglStr !== '') {
+                          hasDate = true;
+                          let parsedDate = new Date(tglStr);
+                          if (isNaN(parsedDate.getTime())) {
+                              const parts = tglStr.split(/[\/\-]/);
+                              if (parts.length === 3) {
+                                  parsedDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                              }
+                          }
+                          
+                          if (!isNaN(parsedDate.getTime())) {
+                              const startDate = new Date('2026-05-29T00:00:00');
+                              const diffTime = parsedDate.getTime() - startDate.getTime();
+                              const diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
+                              if (diffDays >= 0 && diffDays < 21) {
+                                  dayIndex = diffDays;
+                              } else if (diffDays >= 21) {
+                                  dayIndex = 20;
+                              }
+                          }
+                      }
+                  }
+
+                  if (hasDate) {
+                      actualGenStockTakeTotal++;
+                      dailyGenStockTakeActuals[dayIndex]++;
+                  }
+
+                  if (!validForSite) continue;
+
+                  // --- Jika lolos filter site dan masuk Qty >= 1, item terhitung sebagai Actual Reduksi ---
+                  actualTotal++;
+                  dailyActuals[dayIndex]++;
+
+                  // --- Kumpulkan Data Pelaksana (PDTY MP) dari Tab Progress jika ada ---
+                  if (itemQty > 0 && pelaksanaIndex !== -1) {
+                      let picName = (row2[pelaksanaIndex] || 'Tanpa Nama').trim().toUpperCase();
+                      picName = picName.replace(/PELAKSANA/g, '').trim();
+                      if (picName) {
+                          extractedPdtyData[picName] = (extractedPdtyData[picName] || 0) + itemQty;
+                      }
+                  }
 
                   const kodeMaterialRaw = kodeMaterialIndex2 !== -1 ? (row2[kodeMaterialIndex2] || '').trim() : '';
                   // Hapus angka nol di depan pada Material agar sinkron dgn data Price SOH
                   const kodeMaterial = kodeMaterialRaw.replace(/^0+/, ''); 
-                  const alarmVal = alarmIndex2 !== -1 ? (row2[alarmIndex2] || '').trim() : '';
                   
                   let val = 0;
-                  // Jika alarm tidak blank, maka lakukan kalibrasi value (qty actual * price system)
-                  if (alarmVal !== '') {
-                      const actualStr = actualIndex2 !== -1 ? (row2[actualIndex2] || '') : '';
-                      const actualQty = parseCurrency(actualStr);
-                      const price = materialToPrice[kodeMaterial] || 0;
-                      val = actualQty * price;
+                  
+                  // --- LOGIKA PENGAMBILAN VALUE (Total vs Over Stock) ---
+                  let qtyToMultiply = 0;
+                  if (totalQty === overStokQty) {
+                      qtyToMultiply = overStokQty; 
+                  } else if (totalQty > overStokQty) {
+                      qtyToMultiply = overStokQty;
+                  } else if (totalQty < overStokQty) {
+                      qtyToMultiply = totalQty;
+                  }
+                  
+                  // Kalikan Qty dengan ress value / price
+                  if (qtyToMultiply !== 0) {
+                      let price = materialToPrice[kodeMaterial] || 0;
+                      // Ambil dari kolom ress value spesifik jika ada
+                      if (ressValueIndex !== -1 && row2[ressValueIndex] && parseCurrency(row2[ressValueIndex]) !== 0) {
+                          price = parseCurrency(row2[ressValueIndex]);
+                      }
+                      val = qtyToMultiply * price;
                   }
 
                   let determinedType = '';
@@ -1457,7 +1719,7 @@
                   if (determinedType && sumsProgress.hasOwnProperty(determinedType)) {
                       sumsProgress[determinedType] += val;
                   } else if (val > 0) {
-                      // Fallback: Jika tipe material kosong/gagal baca, otomatis kategorikan ke SPRT agar nilai tidak hilang.
+                      // Fallback: Jika tipe material kosong, otomatis kategorikan ke SPRT agar nilai tidak hilang.
                       sumsProgress['SPRT'] += val;
                   }
               }
@@ -1480,8 +1742,96 @@
                   }
               }
 
-              updateDashboardUI(totalSoh, sumsSistem, sumsProgress, potensiTotal);
-              renderAchievementProgressAndChart(actualTotal, targetTotal, kandidatTotal, dailyActuals);
+              // PARSING MB52 TAB: General Stock Take Item Calculation
+              let mb52UniqueItems = new Set();
+              if (rowsMb52.length > 1) {
+                  const headersMb52 = rowsMb52[0].map(h => h.trim().toLowerCase());
+                  const matIdx = headersMb52.findIndex(h => h === 'material' || h === 'kode material');
+                  const unresIdx = headersMb52.findIndex(h => h === 'unrestricted' || h.includes('unrestricted') || h.includes('qty'));
+                  
+                  for (let k = 1; k < rowsMb52.length; k++) {
+                      const row = rowsMb52[k];
+                      if (!row || row.length === 0 || (row.length === 1 && row[0].trim() === '')) continue;
+                      if (!rowMatchesSite(row, headersMb52, selectedSite)) continue;
+                      
+                      let qty = 0;
+                      if (unresIdx !== -1) qty = parseCurrency(row[unresIdx] || '0');
+                      
+                      if (qty > 0) {
+                          const mat = matIdx !== -1 ? (row[matIdx] || '').trim() : '';
+                          if (mat) {
+                              mb52UniqueItems.add(mat.replace(/^0+/, '')); // hindari duplikasi Material
+                          }
+                      }
+                  }
+              }
+              const generalStockTakeTotal = targetTotal + mb52UniqueItems.size;
+
+              updateDashboardUI(totalSoh, sumsSistem, sumsProgress, potensiTotal, generalStockTakeTotal);
+              renderAchievementProgressAndChart(actualTotal, targetTotal, kandidatTotal, dailyActuals, actualGenStockTakeTotal, dailyGenStockTakeActuals);
+
+              // ================= PEMROSESAN DIAGRAM PDTY MP =================
+              let finalPdtyData = { ...fallbackData.pdtyData };
+              
+              try {
+                  const pdtyRes = await fetch(PDTY_URL);
+                  if (pdtyRes.ok) {
+                      const pdtyText = await pdtyRes.text();
+                      const rowsPdty = parseCSV(pdtyText);
+                      
+                      let headerRowIndex = -1;
+                      let nameIdx = -1;
+                      let qtyIdx = -1;
+                      let headersPdty = [];
+
+                      // Deteksi baris header secara dinamis (otomatis mencari 'pelaksana' dan 'ach' maksimal di 20 baris pertama)
+                      for (let r = 0; r < Math.min(20, rowsPdty.length); r++) {
+                          const headers = rowsPdty[r].map(h => h.trim().toLowerCase());
+                          const nIdx = headers.findIndex(h => h.includes('pelaksana') || h.includes('nama') || h.includes('pic'));
+                          const qIdx = headers.findIndex(h => h === 'ach' || h.includes('ach') || h.includes('qty') || h.includes('total') || h.includes('item'));
+                          
+                          if (nIdx !== -1 && qIdx !== -1) {
+                              headerRowIndex = r;
+                              nameIdx = nIdx;
+                              qtyIdx = qIdx;
+                              headersPdty = headers;
+                              break;
+                          }
+                      }
+
+                      if (headerRowIndex !== -1) {
+                          let tempPdtyData = {};
+                          // Cek apakah tabel PDTY ini memiliki kolom referensi site
+                          const siteColExists = headersPdty.some(h => h && (h.includes('site') || h.includes('plant') || h.includes('name 1')));
+
+                          // Membaca data mulai dari 1 baris tepat di bawah header yang ditemukan
+                          for (let i = headerRowIndex + 1; i < rowsPdty.length; i++) {
+                              const row = rowsPdty[i];
+                              if (!row || row.length === 0 || (row.length === 1 && row[0].trim() === '')) continue;
+                              
+                              // Hanya terapkan filter site jika kolom sitenya memang tersedia di rekap PDTY
+                              if (siteColExists && !rowMatchesSite(row, headersPdty, selectedSite)) continue;
+
+                              let name = (row[nameIdx] || '').trim().toUpperCase();
+                              name = name.replace(/PELAKSANA/g, '').trim();
+                              const qty = parseCurrency(row[qtyIdx] || '0');
+                              
+                              // Kumpulkan dan jumlahkan (akumulasi) jika nama ada dan qty > 0
+                              if (name && name !== 'UNKNOWN' && name !== '' && qty > 0) {
+                                  tempPdtyData[name] = (tempPdtyData[name] || 0) + qty;
+                              }
+                          }
+                          if (Object.keys(tempPdtyData).length > 0) {
+                              finalPdtyData = tempPdtyData;
+                          }
+                      }
+                  }
+              } catch (e) {
+                  console.warn('Gagal memuat tab PDTY MP terpisah, menggunakan data fallback pelaksana');
+              }
+              
+              renderPdtyChart(finalPdtyData);
+
           } catch (error) {
               console.warn('Gagal sinkronisasi data online, menggunakan data cadangan lokal:', error);
               
@@ -1508,9 +1858,11 @@
               const dynamicTargetTotal = selectedSite === 'ALL' ? fallbackData.targetTotal : Math.floor(fallbackData.targetTotal * multiplier);
               const dynamicKandidatTotal = selectedSite === 'ALL' ? fallbackData.kandidatTotal : Math.floor(fallbackData.kandidatTotal * multiplier);
               const dynamicPotensiTotal = selectedSite === 'ALL' ? fallbackData.potensiTotal : Math.floor(fallbackData.potensiTotal * multiplier);
+              const dynamicGeneralTotal = selectedSite === 'ALL' ? fallbackData.generalStockTakeTotal : Math.floor(fallbackData.generalStockTakeTotal * multiplier);
               
-              updateDashboardUI(dynamicFallbackSOH, dynamicSumsSistem, dynamicSumsProgress, dynamicPotensiTotal);
-              renderAchievementProgressAndChart(selectedSite === 'ALL' ? 0 : Math.floor(141 * multiplier), dynamicTargetTotal, dynamicKandidatTotal, fallbackData.dailyActuals); 
+              updateDashboardUI(dynamicFallbackSOH, dynamicSumsSistem, dynamicSumsProgress, dynamicPotensiTotal, dynamicGeneralTotal);
+              renderAchievementProgressAndChart(selectedSite === 'ALL' ? 0 : Math.floor(141 * multiplier), dynamicTargetTotal, dynamicKandidatTotal, fallbackData.dailyActuals, fallbackData.actualGenStockTakeTotal, fallbackData.dailyGenStockTakeActuals); 
+              renderPdtyChart(fallbackData.pdtyData);
           } finally {
               if (syncIcon) syncIcon.classList.remove('animate-spin-custom');
               if (syncText) syncText.textContent = 'Sync Manual';
@@ -1521,8 +1873,8 @@
       document.getElementById('site-filter').addEventListener('change', syncData);
 
       document.addEventListener('DOMContentLoaded', () => {
-          updateDashboardUI(fallbackData.totalSoh, fallbackData.sumsSistem, fallbackData.sumsProgress, fallbackData.potensiTotal);
-          renderAchievementProgressAndChart(0, fallbackData.targetTotal, fallbackData.kandidatTotal, fallbackData.dailyActuals); 
+          updateDashboardUI(fallbackData.totalSoh, fallbackData.sumsSistem, fallbackData.sumsProgress, fallbackData.potensiTotal, fallbackData.generalStockTakeTotal);
+          renderAchievementProgressAndChart(0, fallbackData.targetTotal, fallbackData.kandidatTotal, fallbackData.dailyActuals, fallbackData.actualGenStockTakeTotal, fallbackData.dailyGenStockTakeActuals); 
       });
     </script>
 </body>

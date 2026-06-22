@@ -1570,6 +1570,8 @@
               const totalIndexProgress = headers2.findIndex(h => h === 'total' || h === 'total ' || h === ' total ');
               // Tambahan pencarian index untuk kolom Value
               const valueIndexProgress = headers2.findIndex(h => h === 'value' || h.trim() === 'value');
+              // Tambahan index untuk kolom Site (filter CDI)
+              const siteProgressIndex = headers2.findIndex(h => h === 'site' || h === 'plant');
 
               let sumsProgress = { 'SPRT': 0, 'FOGC': 0, 'MDLE': 0, 'TYRE': 0, 'GENS': 0 };
               let extractedPdtyData = {};
@@ -1597,6 +1599,23 @@
               for (let j = 1; j < rowsProgress.length; j++) {
                   const row2 = rowsProgress[j];
                   if (!row2 || row2.length === 0 || (row2.length === 1 && row2[0].trim() === '')) continue;
+
+                  // === MENGUMPULKAN DATA PELAKSANA (PDTY MP) ===
+                  // Dihitung 1 per baris (1 baris = 1 item terkalibrasi) agar sesuai dengan beban kerja asli.
+                  if (pelaksanaIndex !== -1 && row2[pelaksanaIndex]) {
+                      let picName = row2[pelaksanaIndex].trim().toUpperCase();
+                      picName = picName.replace(/PELAKSANA/g, '').trim();
+                      if (picName === 'FATIKHIN') picName = 'FATHIKIN';
+                      
+                      let rowSiteVal = siteProgressIndex !== -1 ? (row2[siteProgressIndex] || '').trim().toUpperCase() : '';
+
+                      // Filter: Bukan CDI (dari nama/site) dan cocok dengan Dropdown Filter Dashboard
+                      if (picName && !picName.includes('CDI') && !rowSiteVal.includes('CDI')) {
+                          if (rowMatchesSite(row2, headers2, selectedSite)) {
+                              extractedPdtyData[picName] = (extractedPdtyData[picName] || 0) + 1; 
+                          }
+                      }
+                  }
 
                   let validForSite = false;
                   let itemQty = 0;
@@ -1674,16 +1693,6 @@
                   // --- Jika lolos filter site dan masuk Qty >= 1, item terhitung sebagai Actual Reduksi ---
                   actualTotal++;
                   dailyActuals[dayIndex]++;
-
-                  // --- Kumpulkan Data Pelaksana (PDTY MP) dari Tab Progress jika ada ---
-                  if (itemQty > 0 && pelaksanaIndex !== -1) {
-                      let picName = (row2[pelaksanaIndex] || 'Tanpa Nama').trim().toUpperCase();
-                      picName = picName.replace(/PELAKSANA/g, '').trim();
-                      // Pengecualian untuk Site CDI sesuai instruksi
-                      if (picName && !picName.includes('CDI')) {
-                          extractedPdtyData[picName] = (extractedPdtyData[picName] || 0) + itemQty;
-                      }
-                  }
 
                   const kodeMaterialRaw = kodeMaterialIndex2 !== -1 ? (row2[kodeMaterialIndex2] || '').trim() : '';
                   // Hapus angka nol di depan pada Material agar sinkron dgn data Price SOH

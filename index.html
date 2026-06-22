@@ -147,20 +147,9 @@
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        <!-- Dropdown Filter Site -->
-                        <select id="site-filter" class="bg-white border border-slate-200 text-[#0B1329] px-3 py-1.5 rounded-sm text-xs font-black shadow-sm focus:outline-none focus:ring-1 focus:ring-[#0B1329] cursor-pointer tracking-wider uppercase">
+                        <!-- Dropdown Filter Site (Locked to ALL) -->
+                        <select id="site-filter" class="bg-slate-100 border border-slate-200 text-slate-500 px-3 py-1.5 rounded-sm text-xs font-black shadow-sm focus:outline-none cursor-not-allowed tracking-wider uppercase" disabled>
                             <option value="ALL">All Site</option>
-                            <option value="COMEX MAS">COMEX MAS</option>
-                            <option value="MAS">MAS</option>
-                            <option value="BSSR">BSSR</option>
-                            <option value="AGM">AGM</option>
-                            <option value="TAJ">TAJ</option>
-                            <option value="BYN">BYN</option>
-                            <option value="MBL HAULING">MBL HAULING</option>
-                            <option value="MHU">MHU</option>
-                            <option value="CDI">CDI</option>
-                            <option value="PMSS">PMSS</option>
-                            <option value="MBL MINING">MBL MINING</option>
                         </select>
                         <div class="flex items-center gap-2">
                             <span id="last-sync-time" class="text-[10px] text-slate-400 font-bold hidden md:inline">Last Sync: -</span>
@@ -236,7 +225,7 @@
                                 <i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
                                 0.00% Dari Target
                             </div>
-                            <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=92855202#gid=92855202" target="_blank" rel="noreferrer" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide hover:text-white transition-colors cursor-pointer">
+                            <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1021972219#gid=1021972219" target="_blank" rel="noreferrer" class="flex items-center text-[10px] font-bold text-white/75 uppercase tracking-wide hover:text-white transition-colors cursor-pointer">
                                 <i data-lucide="external-link" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i>
                                 List Part Non SOH
                             </a>
@@ -382,7 +371,7 @@
 
                             <!-- Legends -->
                             <div class="flex justify-center text-[10px] text-slate-500 font-bold uppercase mt-8 gap-6 flex-wrap">
-                                <span class="flex items-center gap-2"><div class="w-4 border-t-2 border-dashed border-gray-400"></div> Target Rencana (+390 Item/Hari)</span>
+                                <span class="flex items-center gap-2"><div class="w-4 border-t-2 border-dashed border-gray-400"></div> Target Rencana (12.226 Item | +390/Hari)</span>
                                 <span class="flex items-center gap-2"><div class="w-3 h-3 bg-[#1C2541] rounded-sm"></div> Actual Reduksi</span>
                                 <span class="flex items-center gap-2"><div class="w-3 h-3 bg-[#3B5270] rounded-sm"></div> Actual Gen. Stock Take</span>
                             </div>
@@ -496,7 +485,7 @@
                         <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm">
                             <h2 class="text-sm font-black text-[#1D2B36] uppercase tracking-wider border-b border-gray-100 pb-3 mb-6 flex items-center gap-2">
                                 <i data-lucide="pie-chart" class="text-[#0B1329]" style="width: 18px; height: 18px;"></i>
-                                Monitoring PDTY MP Bulan Juni
+                                Monitoring PDTY MP Bulan Mei sd Juni 2026
                             </h2>
                             <p class="text-[11px] text-slate-500 mb-6 font-semibold text-center leading-relaxed">
                                 Distribusi beban kerja & efektivitas pelaksana kalibrasi
@@ -1054,9 +1043,9 @@
               'GENS': 0
           },
           potensiTotal: 14200000000,
-          generalStockTakeTotal: 12500,
-          dailyActuals: new Array(21).fill(0),
-          dailyGenStockTakeActuals: new Array(21).fill(0),
+          generalStockTakeTotal: 12129,
+          dailyActuals: new Array(34).fill(0),
+          dailyGenStockTakeActuals: new Array(34).fill(0),
           actualGenStockTakeTotal: 0,
           pdtyData: { "FATHIKIN": 125, "SLAMET": 90, "WARDANI": 75, "LAINNYA": 45 }
       };
@@ -1239,12 +1228,15 @@
           let timeDiff = today.getTime() - startDate.getTime();
           let daysPassed = Math.floor(timeDiff / (1000 * 3600 * 24)) + 1;
           
-          const totalDays = 21; 
+          const totalDays = 34; 
           if (daysPassed < 1) daysPassed = 1; 
           if (daysPassed > totalDays) daysPassed = totalDays;
 
           const dailyPlan = 390;
-          const planKumulatif = daysPassed * dailyPlan; 
+          const targetRencanaAngka = 12226;
+          
+          let planKumulatif = daysPassed * dailyPlan; 
+          if (planKumulatif > targetRencanaAngka) planKumulatif = targetRencanaAngka;
           const gap = planKumulatif - actualTotal;
 
           const actualPct = targetTotal > 0 ? ((actualTotal / targetTotal) * 100).toFixed(2) : '0.00';
@@ -1252,14 +1244,14 @@
           if (selectedSite !== 'ALL' && selectedSite.toUpperCase() !== 'DC PALARAN') {
               document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `0 Item`);
           } else {
-              document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `${targetTotal.toLocaleString('id-ID')} Item`);
+              document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `${targetRencanaAngka.toLocaleString('id-ID')} Item`);
           }
           
           document.querySelectorAll('[id="kpi-kandidat-kalibrasi"]').forEach(el => el.textContent = `${kandidatTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="kpi-actual-reduksi"]').forEach(el => el.textContent = `${actualTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="kpi-actual-reduksi-pct"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualPct}% Dari Target`);
           document.querySelectorAll('[id="kpi-achievement-pct"]').forEach(el => el.textContent = `${actualPct}%`);
-          document.querySelectorAll('[id="kpi-achievement-ratio"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualTotal.toLocaleString('id-ID')} / ${targetTotal.toLocaleString('id-ID')} Item`);
+          document.querySelectorAll('[id="kpi-achievement-ratio"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualTotal.toLocaleString('id-ID')} / ${targetRencanaAngka.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="plan-kumulatif-val"]').forEach(el => el.textContent = `${planKumulatif.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="actual-final-val"]').forEach(el => el.textContent = `${actualTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="actual-gen-stock-take-val"]').forEach(el => el.textContent = `${actualGenStockTakeTotal.toLocaleString('id-ID')} Item`);
@@ -1270,8 +1262,16 @@
 
           lucide.createIcons();
 
-          let yGridMax = targetTotal > 0 ? Math.ceil((targetTotal * 1.1) / 2000) * 2000 : 10000;
-          if (yGridMax < 2000) yGridMax = 2000; 
+          let maxValForChart = targetRencanaAngka;
+          let tempCumulativeAct = dailyActuals.reduce((a, b) => a + b, 0);
+          let tempCumulativeGen = dailyGenStockTakeActuals.reduce((a, b) => a + b, 0);
+          if (tempCumulativeAct > maxValForChart) maxValForChart = tempCumulativeAct;
+          if (tempCumulativeGen > maxValForChart) maxValForChart = tempCumulativeGen;
+          if (actualTotal > maxValForChart) maxValForChart = actualTotal;
+          if (actualGenStockTakeTotal > maxValForChart) maxValForChart = actualGenStockTakeTotal;
+
+          let yGridMax = Math.ceil((maxValForChart * 1.1) / 2000) * 2000;
+          if (yGridMax < 14000) yGridMax = 14000; 
           const gridStep = yGridMax / 5;
           const graphHeight = 240;
           const yOffset = 280;
@@ -1292,76 +1292,99 @@
               `;
           }
 
-          const xLabels = ['29 May', '01 Jun', '04 Jun', '07 Jun', '10 Jun', '13 Jun', '16 Jun', '18 Jun'];
-          const xPositions = [50, 151.428, 252.857, 354.285, 455.714, 557.142, 658.571, 760];
+          const xLabels = [];
+          const xPositions = [];
+          const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+          for (let i = 0; i < totalDays; i++) {
+              let d = new Date(startDate.getTime() + i * 24 * 3600 * 1000);
+              xLabels.push(`${d.getDate().toString().padStart(2, '0')} ${months[d.getMonth()]}`);
+              xPositions.push(50 + i * (710 / (totalDays - 1)));
+          }
+
           for (let i = 0; i < xLabels.length; i++) {
               const x = xPositions[i];
               svgContent += `
                   <g>
                       <line x1="${x}" y1="40" x2="${x}" y2="280" stroke="#F3F4F6" stroke-width="1" />
-                      <text x="${x}" y="300" font-size="10" font-weight="700" fill="#9CA3AF" text-anchor="middle">${xLabels[i]}</text>
+                      <text x="${x}" y="295" font-size="8" font-weight="700" fill="#9CA3AF" text-anchor="end" transform="rotate(-45 ${x},295)">${xLabels[i]}</text>
                   </g>
               `;
           }
 
-          let planPath = `M 50 ${getY(dailyPlan)}`;
-          const xStep = 710 / (totalDays - 1); 
-          for (let i = 1; i < totalDays; i++) {
+          let planPath = '';
+          let circlesPlan = '';
+          
+          let cumActArr = [];
+          let cumGenArr = [];
+          let tempCumAct = 0;
+          let tempCumGen = 0;
+          for(let i=0; i<totalDays; i++) {
+              if(i < daysPassed) {
+                  tempCumAct += (dailyActuals[i] || 0);
+                  tempCumGen += (dailyGenStockTakeActuals[i] || 0);
+              }
+              cumActArr.push(tempCumAct);
+              cumGenArr.push(tempCumGen);
+          }
+
+          for (let i = 0; i < totalDays; i++) {
               let currentPlan = (i + 1) * dailyPlan;
-              if(currentPlan > targetTotal) currentPlan = targetTotal; 
-              planPath += ` L ${50 + i * xStep} ${getY(currentPlan)}`;
+              if(currentPlan > targetRencanaAngka) currentPlan = targetRencanaAngka; 
+              let x = xPositions[i];
+              let y = getY(currentPlan);
+              if (i === 0) planPath = `M ${x} ${y}`;
+              else planPath += ` L ${x} ${y}`;
+              
+              let tooltip = `Tanggal: ${xLabels[i]}\nTarget Plan: ${currentPlan.toLocaleString('id-ID')} Item`;
+              if (i < daysPassed) {
+                  tooltip += `\nActual Reduksi: ${cumActArr[i].toLocaleString('id-ID')} Item\nGen. Stock Take: ${cumGenArr[i].toLocaleString('id-ID')} Item`;
+              }
+              
+              circlesPlan += `<circle cx="${x}" cy="${y}" r="4" fill="#9CA3AF" class="cursor-pointer hover:fill-slate-700 transition-colors"><title>${tooltip}</title></circle>`;
           }
-          svgContent += `<path d="${planPath}" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="5,4" />`;
+          svgContent += `<path d="${planPath}" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="5,4" />` + circlesPlan;
 
-          let actualPath = `M 50 ${getY(0)}`; 
+          let actualPath = ''; 
           let cumulativeActual = 0;
-          let currentX = 50;
+          let circlesActual = '';
 
-          if (dailyActuals && dailyActuals.length > 0) {
-              for (let i = 0; i < daysPassed; i++) {
-                  cumulativeActual += (dailyActuals[i] || 0);
-                  currentX = 50 + i * xStep;
-                  if (i === 0) {
-                      actualPath = `M ${currentX} ${getY(cumulativeActual)}`;
-                  } else {
-                      actualPath += ` L ${currentX} ${getY(cumulativeActual)}`;
-                  }
-              }
-          } else {
-              currentX = 50 + (daysPassed - 1) * xStep;
-              if (daysPassed > 1) {
-                  actualPath += ` L ${currentX} ${getY(actualTotal)}`;
-              }
-              cumulativeActual = actualTotal;
+          for (let i = 0; i < daysPassed; i++) {
+              cumulativeActual += (dailyActuals[i] || 0);
+              let x = xPositions[i];
+              let y = getY(cumulativeActual);
+              if (i === 0) actualPath = `M ${x} ${y}`;
+              else actualPath += ` L ${x} ${y}`;
+              
+              let currentPlan = (i + 1) * dailyPlan;
+              if(currentPlan > targetRencanaAngka) currentPlan = targetRencanaAngka;
+              let tooltip = `Tanggal: ${xLabels[i]}\nTarget Plan: ${currentPlan.toLocaleString('id-ID')} Item\nActual Reduksi: ${cumulativeActual.toLocaleString('id-ID')} Item\nGen. Stock Take: ${cumGenArr[i].toLocaleString('id-ID')} Item`;
+
+              circlesActual += `<circle cx="${x}" cy="${y}" r="4.5" fill="#1C2541" stroke="#fff" stroke-width="1.5" class="cursor-pointer hover:fill-blue-600 transition-colors"><title>${tooltip}</title></circle>`;
           }
-          
-          svgContent += `<path d="${actualPath}" fill="none" stroke="#1C2541" stroke-width="3" />`;
-          svgContent += `<circle cx="${currentX}" cy="${getY(cumulativeActual)}" r="4" fill="#1C2541" stroke="#fff" stroke-width="1.5" />`;
+          if (daysPassed > 0) {
+              svgContent += `<path d="${actualPath}" fill="none" stroke="#1C2541" stroke-width="3" />` + circlesActual;
+          }
 
-          let genPath = `M 50 ${getY(0)}`; 
+          let genPath = ''; 
           let cumulativeGen = 0;
-          let currentXGen = 50;
+          let circlesGen = '';
 
-          if (dailyGenStockTakeActuals && dailyGenStockTakeActuals.length > 0) {
-              for (let i = 0; i < daysPassed; i++) {
-                  cumulativeGen += (dailyGenStockTakeActuals[i] || 0);
-                  currentXGen = 50 + i * xStep;
-                  if (i === 0) {
-                      genPath = `M ${currentXGen} ${getY(cumulativeGen)}`;
-                  } else {
-                      genPath += ` L ${currentXGen} ${getY(cumulativeGen)}`;
-                  }
-              }
-          } else {
-              currentXGen = 50 + (daysPassed - 1) * xStep;
-              if (daysPassed > 1) {
-                  genPath += ` L ${currentXGen} ${getY(actualGenStockTakeTotal)}`;
-              }
-              cumulativeGen = actualGenStockTakeTotal;
+          for (let i = 0; i < daysPassed; i++) {
+              cumulativeGen += (dailyGenStockTakeActuals[i] || 0);
+              let x = xPositions[i];
+              let y = getY(cumulativeGen);
+              if (i === 0) genPath = `M ${x} ${y}`;
+              else genPath += ` L ${x} ${y}`;
+              
+              let currentPlan = (i + 1) * dailyPlan;
+              if(currentPlan > targetRencanaAngka) currentPlan = targetRencanaAngka;
+              let tooltip = `Tanggal: ${xLabels[i]}\nTarget Plan: ${currentPlan.toLocaleString('id-ID')} Item\nActual Reduksi: ${cumActArr[i].toLocaleString('id-ID')} Item\nGen. Stock Take: ${cumulativeGen.toLocaleString('id-ID')} Item`;
+
+              circlesGen += `<circle cx="${x}" cy="${y}" r="4.5" fill="#3B5270" stroke="#fff" stroke-width="1.5" class="cursor-pointer hover:fill-blue-400 transition-colors"><title>${tooltip}</title></circle>`;
           }
-          
-          svgContent += `<path d="${genPath}" fill="none" stroke="#3B5270" stroke-width="3" />`;
-          svgContent += `<circle cx="${currentXGen}" cy="${getY(cumulativeGen)}" r="4" fill="#3B5270" stroke="#fff" stroke-width="1.5" />`;
+          if (daysPassed > 0) {
+              svgContent += `<path d="${genPath}" fill="none" stroke="#3B5270" stroke-width="3" />` + circlesGen;
+          }
 
           document.querySelectorAll('[id="achievement-chart"]').forEach(svg => {
               svg.innerHTML = svgContent;
@@ -1479,12 +1502,20 @@
                   
                   if (!rowMatchesSite(row, headers1, selectedSite)) continue;
 
+                  const materialCodeRaw = materialIndex1 !== -1 ? (row[materialIndex1] || '').trim() : '';
+                  const descRaw = descIndex1 !== -1 ? (row[descIndex1] || '').trim() : '';
+
+                  // Mencegah penjumlahan ganda: abaikan baris "Grand Total" pada sheet
+                  // Perbaikan: Jangan hapus jika ada kata "total" di deskripsi asalkan kode materialnya ada
+                  if (materialCodeRaw.toLowerCase() === 'total' || materialCodeRaw.toLowerCase() === 'grand total' || (materialCodeRaw === '' && descRaw === '') || (materialCodeRaw === '' && descRaw.toLowerCase().includes('total'))) {
+                      continue;
+                  }
+
                   if (descIndex1 !== -1 && row[descIndex1] && row[descIndex1].trim() !== '') {
                       targetTotal++;
                   }
 
                   const type = typeIndex1 !== -1 ? (row[typeIndex1] || '').trim().toUpperCase() : '';
-                  const materialCodeRaw = materialIndex1 !== -1 ? (row[materialIndex1] || '').trim() : '';
                   // Filter Anti-Leading Zero (menghilangkan nol di awal agar mapping VLOOKUP stabil)
                   const materialCode = materialCodeRaw.replace(/^0+/, ''); 
                   
@@ -1515,12 +1546,8 @@
               // PARSING TAB 2: Kandidat Kalibrasi Fisik & Actual Item
               const headersKandidat = rowsKandidat[0].map(h => h.trim().toLowerCase());
               const descIndexKandidat = headersKandidat.findIndex(h => h.includes('material description') || h === 'description' || h === 'name 1');
-              const statusIndexKandidat = headersKandidat.findIndex(h => h.includes('status') || h.includes('final close') || h.includes('keterangan'));
-              const tglIndexKandidat = headersKandidat.findIndex(h => h.includes('tgl cycle') || h.includes('tanggal cycle'));
               
               let kandidatTotal = 0;
-              let actualTotal = 0;
-              let dailyActuals = new Array(21).fill(0);
 
               for (let i = 1; i < rowsKandidat.length; i++) {
                   const row = rowsKandidat[i];
@@ -1531,58 +1558,28 @@
                   if (descIndexKandidat !== -1 && row[descIndexKandidat] && row[descIndexKandidat].trim() !== '') {
                       kandidatTotal++;
                   }
-
-                  if (statusIndexKandidat !== -1 && row[statusIndexKandidat]) {
-                      const statusVal = row[statusIndexKandidat].trim().toLowerCase();
-                      if (statusVal === 'close' || statusVal === 'closed' || statusVal === 's000' || statusVal === 'done' || statusVal.includes('selesai')) {
-                          actualTotal++;
-                          
-                          let dayIndex = 0; 
-                          if (tglIndexKandidat !== -1 && row[tglIndexKandidat]) {
-                              const tglStr = row[tglIndexKandidat].trim();
-                              let parsedDate = new Date(tglStr);
-                              if (isNaN(parsedDate.getTime())) {
-                                  const parts = tglStr.split(/[\/\-]/);
-                                  if (parts.length === 3) {
-                                      parsedDate = new Date(parts[2], parts[1] - 1, parts[0]);
-                                  }
-                              }
-                              
-                              if (!isNaN(parsedDate.getTime())) {
-                                  const startDate = new Date('2026-05-29T00:00:00');
-                                  const diffTime = parsedDate.getTime() - startDate.getTime();
-                                  const diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
-                                  if (diffDays >= 0 && diffDays < 21) {
-                                      dayIndex = diffDays;
-                                  } else if (diffDays >= 21) {
-                                      dayIndex = 20;
-                                  }
-                              }
-                          }
-                          dailyActuals[dayIndex]++;
-                      }
-                  }
               }
 
-              // PARSING TAB 3: Progress Aktual (Undetected / Non-SOH berdasarkan Qty Over Stok x Ress Value)
+              // PARSING TAB 3: Progress Aktual (Undetected / Non-SOH)
               const headers2 = rowsProgress[0].map(h => h.trim().toLowerCase());
               const kodeMaterialIndex2 = headers2.findIndex(h => h === 'kode material' || h === 'material' || h.includes('total material'));
               const typeIndex2 = headers2.findIndex(h => h.includes('material type') || h.includes('material typel'));
               const qtyOverStokIndex = headers2.findIndex(h => h.includes('qty over') || h.includes('over stok') || h.includes('over stock'));
-              const ressValueIndex = headers2.findIndex(h => h.includes('ress value') || h === 'price' || h.includes('harga'));
               const pelaksanaIndex = headers2.findIndex(h => h.includes('pelaksana') || h.includes('pic') || h.includes('nama') || h.includes('eksekutor'));
               const tglIndexProgress = headers2.findIndex(h => h === 'tanggal' || h.includes('tanggal') || h.includes('tgl') || h.includes('date'));
               const totalIndexProgress = headers2.findIndex(h => h === 'total' || h === 'total ' || h === ' total ');
+              // Tambahan pencarian index untuk kolom Value
+              const valueIndexProgress = headers2.findIndex(h => h === 'value' || h.trim() === 'value');
 
               let sumsProgress = { 'SPRT': 0, 'FOGC': 0, 'MDLE': 0, 'TYRE': 0, 'GENS': 0 };
               let extractedPdtyData = {};
 
               // RESET actualTotal agar dihitung berdasarkan List Actual Reduksi (Tab 3) sesuai site kolom
-              actualTotal = 0; 
-              dailyActuals.fill(0);
+              let actualTotal = 0; 
+              let dailyActuals = new Array(34).fill(0);
               
               let actualGenStockTakeTotal = 0;
-              let dailyGenStockTakeActuals = new Array(21).fill(0);
+              let dailyGenStockTakeActuals = new Array(34).fill(0);
 
               // Identifikasi kolom Site Matrix pada Sheet
               const siteColumnsMap = {
@@ -1609,6 +1606,12 @@
                   const totalStr = totalIndexProgress !== -1 ? (row2[totalIndexProgress] || '') : '';
                   const totalQty = parseCurrency(totalStr);
 
+                  // Membaca Value lebih awal agar baris tidak terlewat
+                  let val = 0;
+                  if (valueIndexProgress !== -1 && row2[valueIndexProgress]) {
+                      val = parseCurrency(row2[valueIndexProgress]);
+                  }
+
                   if (hasMatrixColumns) {
                       // Hitung dari kolom matrix per Site
                       if (selectedSite === 'ALL') {
@@ -1618,19 +1621,19 @@
                               if (idx !== -1) totalMatrixQty += parseCurrency(row2[idx]);
                           }
                           itemQty = totalMatrixQty;
-                          if (itemQty >= 1) validForSite = true;
+                          if (itemQty >= 1 || val > 0 || totalQty > 0) validForSite = true;
                       } else {
                           const idx = siteColumnsMap[selectedSite];
                           if (idx !== -1) {
                               itemQty = parseCurrency(row2[idx]);
-                              if (itemQty >= 1) validForSite = true;
+                              if (itemQty >= 1 || val > 0 || totalQty > 0) validForSite = true;
                           }
                       }
                   } else {
                       // Fallback filtering jika format sheet bukan matrix
                       if (rowMatchesSite(row2, headers2, selectedSite)) {
-                          itemQty = overStokQty;
-                          if (itemQty >= 1) validForSite = true;
+                          itemQty = overStokQty || totalQty || 1;
+                          if (itemQty >= 1 || val > 0 || totalQty > 0) validForSite = true;
                       }
                   }
 
@@ -1652,10 +1655,10 @@
                               const startDate = new Date('2026-05-29T00:00:00');
                               const diffTime = parsedDate.getTime() - startDate.getTime();
                               const diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
-                              if (diffDays >= 0 && diffDays < 21) {
+                              if (diffDays >= 0 && diffDays < 34) {
                                   dayIndex = diffDays;
-                              } else if (diffDays >= 21) {
-                                  dayIndex = 20;
+                              } else if (diffDays >= 34) {
+                                  dayIndex = 33;
                               }
                           }
                       }
@@ -1676,7 +1679,8 @@
                   if (itemQty > 0 && pelaksanaIndex !== -1) {
                       let picName = (row2[pelaksanaIndex] || 'Tanpa Nama').trim().toUpperCase();
                       picName = picName.replace(/PELAKSANA/g, '').trim();
-                      if (picName) {
+                      // Pengecualian untuk Site CDI sesuai instruksi
+                      if (picName && !picName.includes('CDI')) {
                           extractedPdtyData[picName] = (extractedPdtyData[picName] || 0) + itemQty;
                       }
                   }
@@ -1684,28 +1688,6 @@
                   const kodeMaterialRaw = kodeMaterialIndex2 !== -1 ? (row2[kodeMaterialIndex2] || '').trim() : '';
                   // Hapus angka nol di depan pada Material agar sinkron dgn data Price SOH
                   const kodeMaterial = kodeMaterialRaw.replace(/^0+/, ''); 
-                  
-                  let val = 0;
-                  
-                  // --- LOGIKA PENGAMBILAN VALUE (Total vs Over Stock) ---
-                  let qtyToMultiply = 0;
-                  if (totalQty === overStokQty) {
-                      qtyToMultiply = overStokQty; 
-                  } else if (totalQty > overStokQty) {
-                      qtyToMultiply = overStokQty;
-                  } else if (totalQty < overStokQty) {
-                      qtyToMultiply = totalQty;
-                  }
-                  
-                  // Kalikan Qty dengan ress value / price
-                  if (qtyToMultiply !== 0) {
-                      let price = materialToPrice[kodeMaterial] || 0;
-                      // Ambil dari kolom ress value spesifik jika ada
-                      if (ressValueIndex !== -1 && row2[ressValueIndex] && parseCurrency(row2[ressValueIndex]) !== 0) {
-                          price = parseCurrency(row2[ressValueIndex]);
-                      }
-                      val = qtyToMultiply * price;
-                  }
 
                   let determinedType = '';
                   if (typeIndex2 !== -1 && row2[typeIndex2] && row2[typeIndex2].trim() !== '') {
@@ -1765,70 +1747,15 @@
                       }
                   }
               }
-              const generalStockTakeTotal = targetTotal + mb52UniqueItems.size;
+              // Mengunci Total Gen. Stock Take ke 12.129 sesuai instruksi
+              const generalStockTakeTotal = 12129;
 
               updateDashboardUI(totalSoh, sumsSistem, sumsProgress, potensiTotal, generalStockTakeTotal);
               renderAchievementProgressAndChart(actualTotal, targetTotal, kandidatTotal, dailyActuals, actualGenStockTakeTotal, dailyGenStockTakeActuals);
 
               // ================= PEMROSESAN DIAGRAM PDTY MP =================
-              let finalPdtyData = { ...fallbackData.pdtyData };
-              
-              try {
-                  const pdtyRes = await fetch(PDTY_URL);
-                  if (pdtyRes.ok) {
-                      const pdtyText = await pdtyRes.text();
-                      const rowsPdty = parseCSV(pdtyText);
-                      
-                      let headerRowIndex = -1;
-                      let nameIdx = -1;
-                      let qtyIdx = -1;
-                      let headersPdty = [];
-
-                      // Deteksi baris header secara dinamis (otomatis mencari 'pelaksana' dan 'ach' maksimal di 20 baris pertama)
-                      for (let r = 0; r < Math.min(20, rowsPdty.length); r++) {
-                          const headers = rowsPdty[r].map(h => h.trim().toLowerCase());
-                          const nIdx = headers.findIndex(h => h.includes('pelaksana') || h.includes('nama') || h.includes('pic'));
-                          const qIdx = headers.findIndex(h => h === 'ach' || h.includes('ach') || h.includes('qty') || h.includes('total') || h.includes('item'));
-                          
-                          if (nIdx !== -1 && qIdx !== -1) {
-                              headerRowIndex = r;
-                              nameIdx = nIdx;
-                              qtyIdx = qIdx;
-                              headersPdty = headers;
-                              break;
-                          }
-                      }
-
-                      if (headerRowIndex !== -1) {
-                          let tempPdtyData = {};
-                          // Cek apakah tabel PDTY ini memiliki kolom referensi site
-                          const siteColExists = headersPdty.some(h => h && (h.includes('site') || h.includes('plant') || h.includes('name 1')));
-
-                          // Membaca data mulai dari 1 baris tepat di bawah header yang ditemukan
-                          for (let i = headerRowIndex + 1; i < rowsPdty.length; i++) {
-                              const row = rowsPdty[i];
-                              if (!row || row.length === 0 || (row.length === 1 && row[0].trim() === '')) continue;
-                              
-                              // Hanya terapkan filter site jika kolom sitenya memang tersedia di rekap PDTY
-                              if (siteColExists && !rowMatchesSite(row, headersPdty, selectedSite)) continue;
-
-                              let name = (row[nameIdx] || '').trim().toUpperCase();
-                              name = name.replace(/PELAKSANA/g, '').trim();
-                              const qty = parseCurrency(row[qtyIdx] || '0');
-                              
-                              // Kumpulkan dan jumlahkan (akumulasi) jika nama ada dan qty > 0
-                              if (name && name !== 'UNKNOWN' && name !== '' && qty > 0) {
-                                  tempPdtyData[name] = (tempPdtyData[name] || 0) + qty;
-                              }
-                          }
-                          if (Object.keys(tempPdtyData).length > 0) {
-                              finalPdtyData = tempPdtyData;
-                          }
-                      }
-                  }
-              } catch (e) {
-                  console.warn('Gagal memuat tab PDTY MP terpisah, menggunakan data fallback pelaksana');
-              }
+              // Menggunakan data extractedPdtyData dari Tab 3 (List Progress) sesuai instruksi (GID 1021972219)
+              let finalPdtyData = Object.keys(extractedPdtyData).length > 0 ? extractedPdtyData : fallbackData.pdtyData;
               
               renderPdtyChart(finalPdtyData);
 

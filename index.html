@@ -1244,7 +1244,7 @@
           if (selectedSite !== 'ALL' && selectedSite.toUpperCase() !== 'DC PALARAN') {
               document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `0 Item`);
           } else {
-              document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `${targetRencanaAngka.toLocaleString('id-ID')} Item`);
+              document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `${targetTotal.toLocaleString('id-ID')} Item`);
           }
           
           document.querySelectorAll('[id="kpi-kandidat-kalibrasi"]').forEach(el => el.textContent = `${kandidatTotal.toLocaleString('id-ID')} Item`);

@@ -360,7 +360,7 @@
                                 <div class="p-3 rounded-sm border-t-4 shadow-sm flex flex-col justify-between text-white bg-[#2A446C] border-t-[#475E80]">
                                     <div class="text-[10px] font-black uppercase tracking-wider text-white/80 mb-1">Selisih (Gap)</div>
                                     <div class="text-2xl font-black text-white tracking-tight" id="selisih-gap-val">0 Item</div>
-                                    <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Plan - Actual Reduksi</div>
+                                    <div class="text-[9px] font-bold text-white/75 mt-1 border-t border-white/10 pt-2">Plan - Actual Gen. Stock Take</div>
                                 </div>
                             </div>
 
@@ -1237,9 +1237,10 @@
           
           let planKumulatif = daysPassed * dailyPlan; 
           if (planKumulatif > targetRencanaAngka) planKumulatif = targetRencanaAngka;
-          const gap = planKumulatif - actualTotal;
+          const gap = planKumulatif - actualGenStockTakeTotal;
 
-          const actualPct = targetTotal > 0 ? ((actualTotal / targetTotal) * 100).toFixed(2) : '0.00';
+          const reduksiPct = targetTotal > 0 ? ((actualTotal / targetTotal) * 100).toFixed(2) : '0.00';
+          const achievementPct = ((actualGenStockTakeTotal / 12129) * 100).toFixed(2);
 
           if (selectedSite !== 'ALL' && selectedSite.toUpperCase() !== 'DC PALARAN') {
               document.querySelectorAll('[id="target-reduksi-val"]').forEach(el => el.textContent = `0 Item`);
@@ -1249,9 +1250,9 @@
           
           document.querySelectorAll('[id="kpi-kandidat-kalibrasi"]').forEach(el => el.textContent = `${kandidatTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="kpi-actual-reduksi"]').forEach(el => el.textContent = `${actualTotal.toLocaleString('id-ID')} Item`);
-          document.querySelectorAll('[id="kpi-actual-reduksi-pct"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualPct}% Dari Target`);
-          document.querySelectorAll('[id="kpi-achievement-pct"]').forEach(el => el.textContent = `${actualPct}%`);
-          document.querySelectorAll('[id="kpi-achievement-ratio"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualTotal.toLocaleString('id-ID')} / ${targetRencanaAngka.toLocaleString('id-ID')} Item`);
+          document.querySelectorAll('[id="kpi-actual-reduksi-pct"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${reduksiPct}% Dari Target`);
+          document.querySelectorAll('[id="kpi-achievement-pct"]').forEach(el => el.textContent = `${achievementPct}%`);
+          document.querySelectorAll('[id="kpi-achievement-ratio"]').forEach(el => el.innerHTML = `<i data-lucide="arrow-right" class="mr-1 text-white/80" style="width: 12px; height: 12px;"></i> ${actualGenStockTakeTotal.toLocaleString('id-ID')} / 12.129 Item`);
           document.querySelectorAll('[id="plan-kumulatif-val"]').forEach(el => el.textContent = `${planKumulatif.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="actual-final-val"]').forEach(el => el.textContent = `${actualTotal.toLocaleString('id-ID')} Item`);
           document.querySelectorAll('[id="actual-gen-stock-take-val"]').forEach(el => el.textContent = `${actualGenStockTakeTotal.toLocaleString('id-ID')} Item`);

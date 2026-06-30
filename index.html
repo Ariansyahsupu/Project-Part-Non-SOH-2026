@@ -1045,7 +1045,7 @@
               'TYRE': 0,
               'GENS': 0
           },
-          potensiTotal: 14200000000,
+          potensiTotal: 722200000, // Di-lock ke 722.2 Juta
           generalStockTakeTotal: 12129,
           dailyActuals: new Array(34).fill(0),
           dailyGenStockTakeActuals: new Array(34).fill(0),
@@ -1742,46 +1742,40 @@
               }
 
               // PARSING TAB 4: POTENSI REDUCE
-              let potensiTotal = 0;
+              // Nilai di-lock secara mutlak ke 722.2 JT sesuai instruksi
+              let potensiTotal = 722200000; 
+              
+              /* Logika dinamis dinonaktifkan sementara agar nilai tetap terkunci
               if (rowsPotensi.length > 1) {
                   const headersPotensi = rowsPotensi[0].map(h => h.trim().toLowerCase());
-                  const valTindakanIdx = headersPotensi.findIndex(h => h.includes('value tindakan'));
                   
-                  for (let k = 1; k < rowsPotensi.length; k++) {
-                      const row = rowsPotensi[k];
-                      if (!row || row.length === 0 || (row.length === 1 && row[0].trim() === '')) continue;
-                      if (!rowMatchesSite(row, headersPotensi, selectedSite)) continue;
-                      
-                      if (valTindakanIdx !== -1) {
-                          const valStr = row[valTindakanIdx] || '';
-                          potensiTotal += parseCurrency(valStr);
-                      }
-                  }
-              }
-
-              // PARSING MB52 TAB: General Stock Take Item Calculation
-              let mb52UniqueItems = new Set();
-              if (rowsMb52.length > 1) {
-                  const headersMb52 = rowsMb52[0].map(h => h.trim().toLowerCase());
-                  const matIdx = headersMb52.findIndex(h => h === 'material' || h === 'kode material');
-                  const unresIdx = headersMb52.findIndex(h => h === 'unrestricted' || h.includes('unrestricted') || h.includes('qty'));
+                  // Strategi 1: Cari kata kunci spesifik reduksi
+                  let valTindakanIdx = headersPotensi.findIndex(h => 
+                      h.includes('reduce') || h.includes('potensi') || h.includes('tindakan') || 
+                      h.includes('estimasi') || h.includes('selisih') || h.includes('saving')
+                  );
                   
-                  for (let k = 1; k < rowsMb52.length; k++) {
-                      const row = rowsMb52[k];
-                      if (!row || row.length === 0 || (row.length === 1 && row[0].trim() === '')) continue;
-                      if (!rowMatchesSite(row, headersMb52, selectedSite)) continue;
-                      
-                      let qty = 0;
-                      if (unresIdx !== -1) qty = parseCurrency(row[unresIdx] || '0');
-                      
-                      if (qty > 0) {
-                          const mat = matIdx !== -1 ? (row[matIdx] || '').trim() : '';
-                          if (mat) {
-                              mb52UniqueItems.add(mat.replace(/^0+/, '')); // hindari duplikasi Material
+                  // Strategi 2: Jika gagal, cari kolom uang (Value/Rp) dari arah Paling KANAN (kolom hasil akhir)
+                  if (valTindakanIdx === -1) {
+                      for (let i = headersPotensi.length - 1; i >= 0; i--) {
+                          const h = headersPotensi[i];
+                          if ((h.includes('value') || h.includes('amount') || h.includes('rp') || h.includes('total')) && !h.includes('soh') && !h.includes('awal')) {
+                              valTindakanIdx = i;
+                              break;
                           }
                       }
                   }
+                  
+                  for (let k = 1; k < rowsPotensi.length; k++) {
+                      const row = rowsPotensi[k];
+                      if (valTindakanIdx !== -1 && row[valTindakanIdx]) {
+                          const val = parseCurrency(row[valTindakanIdx]);
+                          potensiTotal += val;
+                      }
+                  }
               }
+              */
+
               // Mengunci Total Gen. Stock Take ke 12.129 sesuai instruksi
               const generalStockTakeTotal = 12129;
 

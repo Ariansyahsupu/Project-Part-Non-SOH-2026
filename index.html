@@ -99,6 +99,7 @@
       const prevCcp = () => setCurrentCcpIndex((prev) => (prev === 0 ? ccpData.length - 1 : prev - 1));
 
       useEffect(() => {
+        let intervalId;
         const fetchSheetData = async () => {
           try {
             const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ89SrRMBq0EYLeMFFTMAWbhVl-pzj4x9xZjW73nRw4FCTdIOGYplmkpHkKaf3VRRVnlqGjQWb8fcet/pub?gid=1021972219&single=true&output=csv';
@@ -240,9 +241,13 @@
         };
 
         fetchSheetData();
+        // Memicu penarikan data secara real-time setiap 60 detik (tanpa refresh browser)
+        intervalId = setInterval(fetchSheetData, 60000); 
+        return () => clearInterval(intervalId);
       }, []);
 
       useEffect(() => {
+        let intervalId;
         const fetchPenyerapan = async () => {
             try {
                 const csvUrl = 'https://docs.google.com/spreadsheets/d/1MaJc_iu92iGskG3RPCgJDVgfxTPcNIMI/export?format=csv&gid=1747143952';
@@ -330,6 +335,9 @@
             }
         };
         fetchPenyerapan();
+        // Memicu penarikan data Penyerapan secara real-time setiap 60 detik
+        intervalId = setInterval(fetchPenyerapan, 60000); 
+        return () => clearInterval(intervalId);
       }, []);
 
       const qcPercentage = ((actualQcCount / 6418) * 100).toFixed(1);
@@ -354,8 +362,8 @@
         },
         { 
           fase: "Fase 3: Kalibrasi Fisik (Non-SOH)", aktivitas: "Stock Take & Eksekusi Swap", 
-          subAktivitas: "Penghitungan 14 hari oleh 6 org fisik + paralel input oleh 1 Admin SAP dan Doc Controller", 
-          durasi: "14 Hari", start: "27 Jul 2026", end: "09 Aug 2026", 
+          subAktivitas: "Penghitungan fisik + paralel input oleh Admin SAP dan Doc Controller", 
+          durasi: "36 Hari", start: "27 Jul 2026", end: "31 Aug 2026", 
           deliverable: "SOH Ter-update & Discrepancy tertutup", qualityGate: "Validasi dokumen harian oleh Doc Controller", status: "in-progress"
         },
         { 
@@ -379,23 +387,23 @@
       ];
 
       const TOTAL_PLAN_VALUE = 30372979447;
-      const baseDates = [
-        { date: '25 Jul', plan: 0 },
-        { date: '26 Jul', plan: 474 },
-        { date: '27 Jul', plan: 948 },
-        { date: '28 Jul', plan: 1422 },
-        { date: '29 Jul', plan: 1896 },
-        { date: '30 Jul', plan: 2370 },
-        { date: '31 Jul', plan: 2844 },
-        { date: '01 Aug', plan: 3318 },
-        { date: '02 Aug', plan: 3792 },
-        { date: '03 Aug', plan: 4266 },
-        { date: '04 Aug', plan: 4740 },
-        { date: '05 Aug', plan: 5214 },
-        { date: '06 Aug', plan: 5688 },
-        { date: '07 Aug', plan: 6162 },
-        { date: '08 Aug', plan: 6418 },
-      ];
+      
+      // Meng-generate target kurva proporsional yang memanjang sampai batas akhir 31 Agustus
+      const generateBaseDates = () => {
+        const dates = [{ date: '25 Jul', plan: 0 }];
+        const totalDays = 37; // 26 Juli s.d 31 Agustus
+        const target = 6418;
+        for (let i = 1; i <= totalDays; i++) {
+          let d = new Date(2026, 6, 25 + i); // 6 adalah Index Bulan Juli
+          let monthStr = d.getMonth() === 6 ? 'Jul' : 'Aug';
+          let dayStr = d.getDate().toString().padStart(2, '0');
+          let planVal = Math.round((i / totalDays) * target);
+          dates.push({ date: `${dayStr} ${monthStr}`, plan: planVal });
+        }
+        return dates;
+      };
+      
+      const baseDates = generateBaseDates();
 
       let currentCumCount = 0;
       let currentCumVal = 0;
@@ -944,10 +952,10 @@
                                 <tr class="border-b border-gray-100 hover:bg-slate-50 bg-[#F0F4F8]">
                                     <td class="p-3 font-extrabold text-[#1D2B36] border-r">Fase 3: Kalibrasi Fisik (Non-SOH)</td>
                                     <td class="p-3 font-bold border-r">Stock Take & Eksekusi Swap</td>
-                                    <td class="p-3 border-r">Penghitungan 15 hari oleh 6 org fisik + paralel input oleh 2 Admin SAP & 1 Doc Controller</td>
-                                    <td class="p-3 text-center font-bold border-r">3 Minggu</td>
+                                    <td class="p-3 border-r">Penghitungan fisik + paralel input oleh 2 Admin SAP & 1 Doc Controller</td>
+                                    <td class="p-3 text-center font-bold border-r">36 Hari</td>
                                     <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">27 Jul 2026</td>
-                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">09 Aug 2026</td>
+                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">31 Aug 2026</td>
                                     <td class="p-3 font-semibold border-r">SOH Ter-update & Discrepancy tertutup</td>
                                     <td class="p-3 border-r">Validasi dokumen harian oleh Doc Controller</td>
                                     <td class="p-3 text-center"><span class="bg-[#1C2541] text-white text-[9px] font-black uppercase px-2 py-1 rounded-sm animate-pulse">Berjalan</span></td>
@@ -2490,6 +2498,7 @@
 
                   <div className="relative w-full flex-1 min-h-[300px] mt-2 mb-2">
                      <svg viewBox="0 0 880 450" className="w-full h-full overflow-visible">
+                        <text x="50" y="20" fontSize="10" fontWeight="bold" fill="#8C231C" fontStyle="italic">*Note: Penyesuaian 31 aug MP Harian ,</text>
                         {[0, 1400, 2800, 4200, 5600, 7000].map((val, i) => (
                           <g key={`y-${i}`}>
                             <line x1="50" y1={400 - (val/7000)*360} x2="760" y2={400 - (val/7000)*360} stroke="#E5E7EB" strokeWidth="1" strokeDasharray="3,3" />
@@ -2505,10 +2514,16 @@
 
                         {progressData.map((d, i) => {
                           const xPos = 50 + i * (710 / (progressData.length - 1));
+                          // Tampilkan selang-seling (i % 2) agar teks tgl tidak menumpuk padat karena jumlah hari makin banyak
+                          const showLabel = i % 2 === 0 || i === progressData.length - 1; 
                           return (
                             <g key={`x-${i}`}>
                               <line x1={xPos} y1="40" x2={xPos} y2="400" stroke="#F3F4F6" strokeWidth="1" />
-                              <text x={xPos} y="425" fontSize="11" fontWeight="700" fill="#9CA3AF" textAnchor="middle">{d.date}</text>
+                              {showLabel && (
+                                <text x={xPos} y="420" fontSize="9" fontWeight="700" fill="#9CA3AF" textAnchor="end" transform={`rotate(-45 ${xPos},420)`}>
+                                  {d.date}
+                                </text>
+                              )}
                             </g>
                           );
                         })}

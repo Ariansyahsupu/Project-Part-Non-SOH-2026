@@ -60,6 +60,17 @@
       const [isLoadingPenyerapan, setIsLoadingPenyerapan] = useState(true);
       const [selectedSitePenyerapan, setSelectedSitePenyerapan] = useState('ALL');
       const [dailyProgress, setDailyProgress] = useState({});
+      const [resumeCsvUrl, setResumeCsvUrl] = useState('');
+      const [finalItemCount, setFinalItemCount] = useState(0);
+      const [finalTahap12Value, setFinalTahap12Value] = useState(0);
+      const [finalTotalValue, setFinalTotalValue] = useState(0);
+      const [finalTotalValueItemCount, setFinalTotalValueItemCount] = useState(0);
+      const [finalValueBreakdown, setFinalValueBreakdown] = useState({});
+      const [finalUnrestrictedTotal, setFinalUnrestrictedTotal] = useState(0);
+      const [showUnrestrictedBreakdown, setShowUnrestrictedBreakdown] = useState(false);
+      const [showPenyerapanBreakdown, setShowPenyerapanBreakdown] = useState(false);
+      const [showDiReduceModal, setShowDiReduceModal] = useState(false);
+      const [finalValueDiReduceBreakdown, setFinalValueDiReduceBreakdown] = useState({});
 
       // 6 Dokumentasi final dengan ID yang unik dan menggunakan format Thumbnail API
       const ccpData = [
@@ -92,6 +103,16 @@
           title: "DC PALARAN - PERSIAPAN MOVING CONTAINER",
           remark: "DC PALARAN - PERSIAPAN MOVING CONTAINER",
           img: "https://drive.google.com/thumbnail?id=1OZsdK-ULPr-ARK1i3pMXDnn60vmf7zPH&sz=w1000"
+        },
+        {
+          title: "DC PALARAN - RELOKASI MATERIAL AFTER QC (PEMBUATAN LAYOU BOX/PALET)",
+          remark: "DC PALARAN - RELOKASI MATERIAL AFTER QC (PEMBUATAN LAYOU BOX/PALET)",
+          img: "https://drive.google.com/thumbnail?id=1stDTuRablZk0apuwSBo2RmoNoQ0s6DMR&sz=w1000"
+        },
+        {
+          title: "DC PALARAN - SETTING RAK PADA KONTAINER BARU PELUASAN AREA",
+          remark: "DC PALARAN - SETTING RAK PADA KONTAINER BARU PELUASAN AREA",
+          img: "https://drive.google.com/thumbnail?id=1Qevw22czlHriIXMYegboy46-I_paU66w&sz=w1000"
         }
       ];
 
@@ -147,6 +168,9 @@
                 let count = 0;
                 let totalValue = 0;
                 let tempDaily = {};
+                let resumeExcelRows = [];
+                const escapeHtml = (unsafe) => (unsafe || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+                resumeExcelRows.push('<tr>' + rows[0].map(h => `<th style="background-color: #8C231C; color: white;">${escapeHtml(h)}</th>`).join('') + '</tr>');
                 const startDate = new Date(2026, 6, 14); 
                 
                 for (let i = 1; i < rows.length; i++) {
@@ -201,6 +225,27 @@
                             if (!tempDaily[dateKey]) tempDaily[dateKey] = { count: 0, val: 0 };
                             tempDaily[dateKey].count++;
                             tempDaily[dateKey].val += itemVal;
+                            
+                            resumeExcelRows.push('<tr>' + row.map((cell, idx) => {
+                                const headerStr = headers[idx] ? headers[idx].toLowerCase().trim() : '';
+                                const isValueCol = headerStr.includes('ress value') || headerStr.includes('total value') || headerStr === 'value' || headerStr.includes('value');
+                                
+                                if (isValueCol) {
+                                    let cleanNum = (cell || '').toString().replace(/Rp/gi, '').replace(/"/g, '').replace(/\s/g, '');
+                                    cleanNum = cleanNum.replace(/[,.]00$/, '');
+                                    if (cleanNum.includes(',')) {
+                                        const parts = cleanNum.split(',');
+                                        if (parts[parts.length - 1].length <= 2) {
+                                            cleanNum = parts[0];
+                                        }
+                                    }
+                                    cleanNum = cleanNum.replace(/\D/g, '');
+                                    if (cleanNum !== '') {
+                                        return `<td style="mso-number-format:'0';">${cleanNum}</td>`;
+                                    }
+                                }
+                                return `<td>${escapeHtml(cell)}</td>`;
+                            }).join('') + '</tr>');
                         }
                     }
                 }
@@ -210,6 +255,11 @@
                 
                 setActualQcCount(finalCount);
                 setActualQcValue(finalValue);
+
+                const finalExcelContent = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body><table border="1">${resumeExcelRows.join('')}</table></body></html>`;
+                const blob = new Blob([finalExcelContent], { type: 'application/vnd.ms-excel' });
+                setResumeCsvUrl(URL.createObjectURL(blob));
+
                 // Progres harian dinamis dari 25-27 Juli agar grafik tidak stuck
                 setDailyProgress(Object.keys(tempDaily).length > 0 ? tempDaily : { 
                   '25 Jul': {count: 350, val: 1200000000}, 
@@ -243,6 +293,242 @@
         fetchSheetData();
         // Memicu penarikan data secara real-time setiap 60 detik (tanpa refresh browser)
         intervalId = setInterval(fetchSheetData, 60000); 
+        return () => clearInterval(intervalId);
+      }, []);
+
+      useEffect(() => {
+        let intervalId;
+        const fetchFinalItemCount = async () => {
+            try {
+                const csvUrl = 'https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/export?format=csv&gid=1021972219';
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error("Gagal load CSV Final Item");
+                const csvText = await response.text();
+                
+                const parseCsvRow = (text) => {
+                    const result = [];
+                    let cell = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            result.push(cell);
+                            cell = '';
+                        } else {
+                            cell += char;
+                        }
+                    }
+                    result.push(cell);
+                    return result;
+                };
+
+                const rawLines = csvText.split(/\r?\n/);
+                if (rawLines.length > 0) {
+                    const headers = parseCsvRow(rawLines[0]).map(h => h.trim().toLowerCase());
+                    const pelaksanaIndex = headers.findIndex(h => h.includes('pelaksana'));
+                    const totalValueIndex = headers.findIndex(h => h.includes('total value') || h === 'value');
+                    
+                    if (pelaksanaIndex !== -1) {
+                        let count = 0;
+                        let totalVal = 0;
+                        for(let i = 1; i < rawLines.length; i++) {
+                            if (!rawLines[i].trim()) continue;
+                            const row = parseCsvRow(rawLines[i]);
+                            const pelaksanaVal = (row[pelaksanaIndex] || '').trim();
+                            if (pelaksanaVal !== '') {
+                                count++;
+                                if (totalValueIndex !== -1 && row[totalValueIndex]) {
+                                    let valStr = row[totalValueIndex].toString();
+                                    valStr = valStr.replace(/Rp/gi, '').replace(/"/g, '').replace(/\s/g, '');
+                                    valStr = valStr.replace(/[,.]00$/, '');
+                                    if (valStr.includes(',')) {
+                                        const parts = valStr.split(',');
+                                        if (parts[parts.length - 1].length <= 2) {
+                                            valStr = parts[0];
+                                        }
+                                    }
+                                    valStr = valStr.replace(/\D/g, '');
+                                    const val = parseInt(valStr, 10);
+                                    if (!isNaN(val) && val > 0) {
+                                        totalVal += val;
+                                    }
+                                }
+                            }
+                        }
+                        if(count > 0) setFinalItemCount(count);
+                        if(totalVal > 0) setFinalTahap12Value(totalVal);
+                    }
+                }
+            } catch (err) {
+                console.warn("Gagal mengambil data Final Item Count:", err);
+            }
+        };
+        fetchFinalItemCount();
+        intervalId = setInterval(fetchFinalItemCount, 60000);
+        return () => clearInterval(intervalId);
+      }, []);
+
+      useEffect(() => {
+        let intervalId;
+        const fetchFinalValueDiReduce = async () => {
+            try {
+                const csvUrl = 'https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/export?format=csv&gid=1375266193';
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error("Gagal load CSV Final Value Reduce");
+                const csvText = await response.text();
+                
+                const parseCsvRow = (text) => {
+                    const result = [];
+                    let cell = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            result.push(cell);
+                            cell = '';
+                        } else {
+                            cell += char;
+                        }
+                    }
+                    result.push(cell);
+                    return result;
+                };
+
+                const rawLines = csvText.split(/\r?\n/);
+                if (rawLines.length > 0) {
+                    const headers = parseCsvRow(rawLines[0]).map(h => h.trim().toLowerCase());
+                    const valueIndex = headers.findIndex(h => h.includes('value unrestricted'));
+                    const descIndex = headers.findIndex(h => h.includes('material description') || h === 'description');
+                    const siteIndex = headers.findIndex(h => h === 'plant' || h.includes('site') || h === 'name 1' || h.includes('lokasi'));
+                    
+                    if (valueIndex !== -1 && descIndex !== -1) {
+                        let totalVal = 0;
+                        let itemCount = 0;
+                        let siteData = {};
+
+                        for(let i = 1; i < rawLines.length; i++) {
+                            if (!rawLines[i].trim()) continue;
+                            const row = parseCsvRow(rawLines[i]);
+                            
+                            let valStr = (row[valueIndex] || '0').toString();
+                            valStr = valStr.replace(/Rp/gi, '').replace(/"/g, '').replace(/\s/g, '');
+                            valStr = valStr.replace(/[,.]00$/, '');
+                            if (valStr.includes(',')) {
+                                const parts = valStr.split(',');
+                                if (parts[parts.length - 1].length <= 2) {
+                                    valStr = parts[0];
+                                }
+                            }
+                            valStr = valStr.replace(/\D/g, '');
+                            const val = parseInt(valStr, 10);
+                            
+                            if (descIndex !== -1 && row[descIndex] && row[descIndex].trim() !== '') {
+                                itemCount++;
+                            }
+
+                            if (!isNaN(val) && val > 0) {
+                                totalVal += val;
+                                if (siteIndex !== -1) {
+                                    let siteName = (row[siteIndex] || 'UNMAPPED').trim().toUpperCase();
+                                    if (siteName === '') siteName = 'UNMAPPED';
+                                    if (!siteData[siteName]) siteData[siteName] = 0;
+                                    siteData[siteName] += val;
+                                }
+                            }
+                        }
+                        if(totalVal > 0) setFinalTotalValue(totalVal);
+                        if(itemCount > 0) setFinalTotalValueItemCount(itemCount);
+                        if(Object.keys(siteData).length > 0) setFinalValueDiReduceBreakdown(siteData);
+                    }
+                }
+            } catch (err) {
+                console.warn("Gagal mengambil data Final Unrestricted:", err);
+            }
+        };
+        fetchFinalValueDiReduce();
+        intervalId = setInterval(fetchFinalValueDiReduce, 60000);
+        return () => clearInterval(intervalId);
+      }, []);
+
+      useEffect(() => {
+        let intervalId;
+        const fetchFinalUnrestricted = async () => {
+            try {
+                const csvUrl = 'https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/export?format=csv&gid=770971417';
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error("Gagal load CSV Final Unrestricted");
+                const csvText = await response.text();
+                
+                const parseCsvRow = (text) => {
+                    const result = [];
+                    let cell = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            result.push(cell);
+                            cell = '';
+                        } else {
+                            cell += char;
+                        }
+                    }
+                    result.push(cell);
+                    return result;
+                };
+
+                const rawLines = csvText.split(/\r?\n/);
+                if (rawLines.length > 0) {
+                    const headers = parseCsvRow(rawLines[0]).map(h => h.trim().toLowerCase());
+                    const valueIndex = headers.findIndex(h => h.includes('value unrestricted') || h === 'value');
+                    const siteIndex = headers.findIndex(h => h === 'plant' || h.includes('site') || h === 'name 1' || h.includes('lokasi'));
+                    
+                    if (valueIndex !== -1) {
+                        let totalVal = 0;
+                        let siteData = {};
+
+                        for(let i = 1; i < rawLines.length; i++) {
+                            if (!rawLines[i].trim()) continue;
+                            const row = parseCsvRow(rawLines[i]);
+                            
+                            let valStr = (row[valueIndex] || '0').toString();
+                            valStr = valStr.replace(/Rp/gi, '').replace(/"/g, '').replace(/\s/g, '');
+                            valStr = valStr.replace(/[,.]00$/, '');
+                            if (valStr.includes(',')) {
+                                const parts = valStr.split(',');
+                                if (parts[parts.length - 1].length <= 2) {
+                                    valStr = parts[0];
+                                }
+                            }
+                            
+                            valStr = valStr.replace(/\D/g, '');
+                            const val = parseInt(valStr, 10);
+                            
+                            if (!isNaN(val) && val > 0) {
+                                totalVal += val;
+                                if (siteIndex !== -1) {
+                                    let siteName = (row[siteIndex] || 'UNMAPPED').trim().toUpperCase();
+                                    if (siteName === '') siteName = 'UNMAPPED';
+                                    if (!siteData[siteName]) siteData[siteName] = 0;
+                                    siteData[siteName] += val;
+                                }
+                            }
+                        }
+                        if(totalVal > 0) setFinalUnrestrictedTotal(totalVal);
+                        if(Object.keys(siteData).length > 0) setFinalValueBreakdown(siteData);
+                    }
+                }
+            } catch (err) {
+                console.warn("Gagal mengambil data Final Unrestricted:", err);
+            }
+        };
+        fetchFinalUnrestricted();
+        intervalId = setInterval(fetchFinalUnrestricted, 60000);
         return () => clearInterval(intervalId);
       }, []);
 
@@ -340,8 +626,13 @@
         return () => clearInterval(intervalId);
       }, []);
 
-      const qcPercentage = ((actualQcCount / 6418) * 100).toFixed(1);
-      const qcValuePercentage = ((actualQcValue / 30372979447) * 100).toFixed(1); 
+      const duplicateCount = 1756;
+      const duplicateValue = actualQcCount > 0 ? Math.round((actualQcValue / actualQcCount) * duplicateCount) : 0;
+      const grandTotalCount = actualQcCount + duplicateCount;
+      const grandTotalValue = actualQcValue + duplicateValue;
+
+      const qcPercentage = ((grandTotalCount / 6418) * 100).toFixed(1);
+      const qcValuePercentage = ((grandTotalValue / 30372979447) * 100).toFixed(1); 
 
       const formatRupiah = (value) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
@@ -410,6 +701,9 @@
       const eodToday = new Date();
       eodToday.setHours(23, 59, 59, 999);
 
+      const countRatio = actualQcCount > 0 ? grandTotalCount / actualQcCount : 1;
+      const valueRatio = actualQcValue > 0 ? grandTotalValue / actualQcValue : 1;
+
       const progressData = baseDates.map((d) => {
           const parts = d.date.split(' ');
           const monthIdx = parts[1] === 'Jul' ? 6 : 7;
@@ -420,14 +714,14 @@
           }
           
           if (dailyProgress[d.date]) {
-              currentCumCount += dailyProgress[d.date].count;
-              currentCumVal += dailyProgress[d.date].val;
+              currentCumCount += dailyProgress[d.date].count * countRatio;
+              currentCumVal += dailyProgress[d.date].val * valueRatio;
           }
           
           return {
               ...d,
-              actual: currentCumCount,
-              actualValue: currentCumVal,
+              actual: Math.round(currentCumCount),
+              actualValue: Math.round(currentCumVal),
               planValue: Math.round((d.plan/6418)*TOTAL_PLAN_VALUE)
           };
       });
@@ -2066,8 +2360,19 @@
 
         const targetItem = 6418;
         const targetValue = 30372979447;
-        const itemHeight = Math.min((actualQcCount / targetItem) * 200, 200) || 0;
-        const valueHeight = Math.min((actualQcValue / targetValue) * 200, 200) || 0;
+        
+        const displayFinalItemCount = finalItemCount > 0 ? finalItemCount : grandTotalCount;
+        const displayTahap12Value = finalTahap12Value > 0 ? finalTahap12Value : 0;
+        const finalItemPercentage = Math.min((displayFinalItemCount / targetItem) * 100, 100).toFixed(1);
+
+        const displayFinalValue = finalTotalValue > 0 ? finalTotalValue : grandTotalValue;
+        const displayFinalValueItemCount = finalTotalValueItemCount > 0 ? finalTotalValueItemCount : 0;
+        
+        // Penyesuaian persentase bar penurunan (Di-set full sesuai instruksi)
+        const finalValuePercentage = 100;
+        
+        const itemHeight = Math.min((displayFinalItemCount / targetItem) * 200, 200) || 0;
+        const valueHeight = Math.min((displayFinalValue / targetValue) * 200, 200) || 0;
 
         const globalStatusTotals = {};
         Object.values(penyerapanData).forEach(siteData => {
@@ -2095,8 +2400,54 @@
             displayData = penyerapanData[selectedSitePenyerapan];
         }
 
+        const valueBA = 1176976910;
+        const selisihValue = displayFinalValue - valueBA - finalUnrestrictedTotal;
+        const pctBA = displayFinalValue > 0 ? (valueBA / displayFinalValue) * 100 : 0;
+        const pctS000 = displayFinalValue > 0 ? (finalUnrestrictedTotal / displayFinalValue) * 100 : 0;
+        const pctSelisih = displayFinalValue > 0 ? (Math.abs(selisihValue) / displayFinalValue) * 100 : 0;
+
         return (
           <div className="min-h-screen bg-[#F4F5F7] font-sans pb-12">
+            
+            {showDiReduceModal && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                  <div className="bg-white rounded-sm shadow-xl max-w-lg w-full overflow-hidden flex flex-col max-h-[85vh]">
+                      <div className="bg-[#3A5A61] text-white p-4 flex justify-between items-center shrink-0">
+                          <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
+                              <Database size={16} /> Breakdown Site Value Di-Reduce
+                          </h3>
+                          <button onClick={() => setShowDiReduceModal(false)} className="hover:text-gray-300 font-bold text-lg leading-none">
+                              &times;
+                          </button>
+                      </div>
+                      <div className="p-4 overflow-y-auto custom-scrollbar">
+                          <table className="w-full text-left border-collapse">
+                              <thead>
+                                  <tr className="bg-slate-100 text-[#1D2B36] text-[10px] font-black uppercase tracking-wider">
+                                      <th className="p-3 w-1/2 border-b border-slate-200">SITE / PLANT</th>
+                                      <th className="p-3 w-1/2 text-right border-b border-slate-200">VALUE</th>
+                                  </tr>
+                              </thead>
+                              <tbody className="text-xs text-slate-700">
+                                  {Object.keys(finalValueDiReduceBreakdown).length > 0 ? (
+                                      Object.entries(finalValueDiReduceBreakdown).sort((a,b) => b[1] - a[1]).map(([site, val], idx) => (
+                                          <tr key={idx} className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                                              <td className="p-3 font-bold border-r border-slate-100">{site}</td>
+                                              <td className="p-3 text-right font-mono">{formatRupiah(val)}</td>
+                                          </tr>
+                                      ))
+                                  ) : (
+                                      <tr>
+                                          <td colSpan="2" className="p-4 text-center text-slate-500 font-bold text-xs bg-slate-50">Mengambil rincian data site...</td>
+                                      </tr>
+                                  )}
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+              </div>
+            )}
+
             <div className="w-full h-12 bg-[#2A446C] flex items-center px-6 shadow-sm">
               <button 
                   onClick={() => setView('menu')}
@@ -2128,83 +2479,239 @@
                         HASIL AKHIR REDUCE INVENTORY S000 (SWAP MATERIAL)
                     </h2>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div className="bg-[#FAFAFA] border border-gray-200 rounded-sm p-6 shadow-sm">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xs font-black text-slate-500 uppercase tracking-wider">Total Item Di-Reduce</h3>
-                                <span className="bg-[#8C231C]/10 text-[#8C231C] px-2 py-1 rounded text-[10px] font-bold">{qcPercentage}% Selesai</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-stretch">
+                        <div className="bg-[#FAFAFA] border border-gray-200 rounded-sm p-6 shadow-sm flex flex-col">
+                            <div className="flex-1 flex flex-col">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-wider">Total Item ter QC Tahap 1 Dan 2</h3>
+                                </div>
+                                <div className="flex items-end gap-3 mb-2 flex-wrap">
+                                    <span className="text-4xl font-black text-[#1D2B36]">{displayFinalItemCount.toLocaleString('id-ID')}</span>
+                                    {displayTahap12Value > 0 && (
+                                        <span className="text-xl font-bold text-slate-500 mb-1">/ {formatRupiah(displayTahap12Value)}</span>
+                                    )}
+                                </div>
+                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-6">
+                                    <div>+ PART NON SOH BY ITEM (TERDETEKSI S000 SITE CLOSING): 6.822</div>
+                                    <div className="mt-1">+ PART NON SOH BY VALUE (TERDETEKSI S000 SITE CLOSING): Rp 983.638.949</div>
+                                </div>
                             </div>
-                            <div className="flex items-end gap-3 mb-6 flex-wrap">
-                                <span className="text-4xl font-black text-[#1D2B36]">{actualQcCount.toLocaleString('id-ID')}</span>
-                                <span className="text-sm font-bold text-slate-400 mb-1">/ 6.418 Item</span>
-                            </div>
-                            <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#8C231C] transition-all duration-1000" style={{ width: `${qcPercentage}%` }}></div>
-                            </div>
-                            <div className="flex justify-between text-[10px] font-bold text-slate-500 mt-2">
-                                <span>0</span>
-                                <span>Sisa: {(6418 - actualQcCount).toLocaleString('id-ID')} Item</span>
-                                <span>6.418</span>
+                            <div className="mt-auto w-full">
+                                <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden mb-4">
+                                    <div className="h-full bg-[#8C231C] transition-all duration-1000" style={{ width: `${finalItemPercentage}%` }}></div>
+                                </div>
+                                <div className="pt-3 border-t border-gray-200 flex flex-col gap-1.5 min-h-[48px] justify-center">
+                                    <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1021972219#gid=1021972219" target="_blank" rel="noreferrer" className="text-[#8C231C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                                        Sumber Data Item <ExternalLink size={10} />
+                                    </a>
+                                    <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1992919964#gid=1992919964" target="_blank" rel="noreferrer" className="text-[#8C231C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                                        Sumber Data PART NON SOH (Site Closing) <ExternalLink size={10} />
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="bg-[#FAFAFA] border border-gray-200 rounded-sm p-6 shadow-sm">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xs font-black text-slate-500 uppercase tracking-wider">Total Value Di-Reduce</h3>
-                                <span className="bg-[#3A5A61]/10 text-[#3A5A61] px-2 py-1 rounded text-[10px] font-bold">{qcValuePercentage}% Selesai</span>
+                        <div className="bg-[#FAFAFA] border border-gray-200 rounded-sm p-6 shadow-sm flex flex-col">
+                            <div className="flex-1 flex flex-col">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-wider">Total Value Di-Reduce</h3>
+                                    <button 
+                                        onClick={() => setShowDiReduceModal(true)}
+                                        className="bg-[#3A5A61] hover:bg-[#2A446C] text-white px-2.5 py-1 rounded-sm text-[9px] font-bold uppercase tracking-wider transition-colors shadow-sm"
+                                    >
+                                        Breakdown Site
+                                    </button>
+                                </div>
+                                <div className="flex items-end gap-3 mb-6 flex-wrap">
+                                    <span className="text-2xl sm:text-3xl font-black text-[#1D2B36]">{formatRupiah(displayFinalValue)}</span>
+                                    <span className="text-sm font-bold text-slate-400 mb-1">({displayFinalValueItemCount.toLocaleString('id-ID')} Item)</span>
+                                </div>
                             </div>
-                            <div className="flex items-end gap-3 mb-6 flex-wrap">
-                                <span className="text-2xl sm:text-3xl font-black text-[#1D2B36]">{formatRupiah(actualQcValue)}</span>
-                            </div>
-                            <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#3A5A61] transition-all duration-1000" style={{ width: `${qcValuePercentage}%` }}></div>
-                            </div>
-                            <div className="flex justify-between text-[10px] font-bold text-slate-500 mt-2">
-                                <span>Rp 0</span>
-                                <span>Sisa: {formatRupiah(30372979447 - actualQcValue)}</span>
-                                <span>Rp 30.37 M</span>
+                            <div className="mt-auto w-full">
+                                <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden mb-4">
+                                    <div className="h-full bg-[#3A5A61] transition-all duration-1000" style={{ width: `${finalValuePercentage}%` }}></div>
+                                </div>
+                                <div className="pt-3 border-t border-gray-200 flex flex-col gap-1.5 min-h-[48px] justify-center">
+                                    <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1375266193#gid=1375266193" target="_blank" rel="noreferrer" className="text-[#3A5A61] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                                        Sumber Data Value <ExternalLink size={10} />
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div className="relative w-full aspect-[2/1] md:aspect-[3/1] min-h-[300px] mt-4">
-                        <svg viewBox="0 0 800 320" className="w-full h-full overflow-visible">
-                            <g stroke="#E5E7EB" strokeWidth="1" strokeDasharray="4,4">
-                                <line x1="80" y1="50" x2="720" y2="50" />
-                                <line x1="80" y1="100" x2="720" y2="100" />
-                                <line x1="80" y1="150" x2="720" y2="150" />
-                                <line x1="80" y1="200" x2="720" y2="200" />
-                                <line x1="80" y1="250" x2="720" y2="250" />
-                            </g>
-                            
-                            <g fill="#9CA3AF" fontSize="10" fontWeight="bold" textAnchor="end">
-                                <text x="70" y="54">100%</text>
-                                <text x="70" y="104">75%</text>
-                                <text x="70" y="154">50%</text>
-                                <text x="70" y="204">25%</text>
-                                <text x="70" y="254">0%</text>
-                            </g>
-                            
-                            <line x1="80" y1="250" x2="720" y2="250" stroke="#9CA3AF" strokeWidth="2" />
-                            
-                            <rect x="180" y="50" width="60" height="200" fill="#E2E8F0" rx="4" />
-                            <text x="210" y="270" fill="#4B5563" fontSize="11" fontWeight="bold" textAnchor="middle">Target Item</text>
-                            <text x="210" y="40" fill="#64748B" fontSize="10" fontWeight="bold" textAnchor="middle">6.418</text>
+                <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm mt-6">
+                    <div className="flex justify-between items-end border-b border-gray-100 pb-3 mb-4">
+                        <h2 className="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2">
+                            <Activity className="text-[#2A446C]" size={18} />
+                            FINAL SWAP MATERIAL S000 SITE DAN TF S000 SITE EXISTING
+                        </h2>
+                        <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1992919964#gid=1992919964" target="_blank" rel="noreferrer" className="text-[#2A446C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                            Sumber Data <ExternalLink size={10} />
+                        </a>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-[#2A446C] text-white text-[10px] font-black uppercase tracking-wider">
+                                    <th className="p-3 w-1/5">SITE</th>
+                                    <th className="p-3 w-1/5 text-center">TOTAL ITEM</th>
+                                    <th className="p-3 w-1/5 text-right">VALUE</th>
+                                    <th className="p-3 w-1/5 pl-6">REMARKS</th>
+                                    <th className="p-3 w-1/5 text-center">CCP</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-xs text-slate-700">
+                                <tr className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                                    <td className="p-3 font-bold border-r border-slate-100">DC PALARAN</td>
+                                    <td className="p-3 text-center border-r border-slate-100">47</td>
+                                    <td className="p-3 text-right font-mono border-r border-slate-100">Rp 58.480.618</td>
+                                    <td className="p-3 text-[#2A446C] font-bold border-r border-slate-100 pl-6">BA TERVALIDASI</td>
+                                    <td className="p-3 text-center">
+                                        <a href="https://drive.google.com/file/d/1UmL3n3VPFiR81U_KqPpb661lXzzFUEe7/view" target="_blank" rel="noreferrer" className="text-[#2A446C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                                            Link BA <ExternalLink size={10} />
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                                    <td className="p-3 font-bold border-r border-slate-100">BYN</td>
+                                    <td className="p-3 text-center border-r border-slate-100">141</td>
+                                    <td className="p-3 text-right font-mono border-r border-slate-100">Rp 1.078.500.875</td>
+                                    <td className="p-3 text-[#2A446C] font-bold border-r border-slate-100 pl-6">BA TERVALIDASI</td>
+                                    <td className="p-3 text-center">
+                                        <a href="https://drive.google.com/file/d/1xFv_c5I4ot7BYpkDAAzwEkQyGFJtfZ8W/view" target="_blank" rel="noreferrer" className="text-[#2A446C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                                            Link BA <ExternalLink size={10} />
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                                    <td className="p-3 font-bold border-r border-slate-100">CDI</td>
+                                    <td className="p-3 text-center border-r border-slate-100">3</td>
+                                    <td className="p-3 text-right font-mono border-r border-slate-100">Rp 39.995.417</td>
+                                    <td className="p-3 text-amber-600 font-bold border-r border-slate-100 pl-6">WAITING FULL VAALIDASI</td>
+                                    <td className="p-3 text-center">
+                                        <a href="https://drive.google.com/file/d/11248xbMoG1ESFSknKcThfkqYn9yDFjMe/view" target="_blank" rel="noreferrer" className="text-[#2A446C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                                            Link BA <ExternalLink size={10} />
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr className="bg-slate-100 text-[#1D2B36] text-xs font-black uppercase tracking-wider">
+                                    <td className="p-3 border-r border-slate-200">TOTAL</td>
+                                    <td className="p-3 text-center border-r border-slate-200">191</td>
+                                    <td className="p-3 text-right font-mono border-r border-slate-200">Rp 1.176.976.910</td>
+                                    <td className="p-3 border-r border-slate-200"></td>
+                                    <td className="p-3"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
 
-                            <rect x="250" y={250 - itemHeight} width="60" height={itemHeight} fill="#8C231C" rx="4" className="transition-all duration-1000" />
-                            <text x="280" y="285" fill="#8C231C" fontSize="11" fontWeight="black" textAnchor="middle">Actual (Reduce)</text>
-                            <text x="280" y={240 - itemHeight} fill="#8C231C" fontSize="11" fontWeight="black" textAnchor="middle">{actualQcCount.toLocaleString('id-ID')}</text>
+                <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm mt-6">
+                    <div className="flex justify-between items-end border-b border-gray-100 pb-3 mb-4">
+                        <h2 className="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2">
+                            <Database className="text-[#2A446C]" size={18} />
+                            VALUE UNRESTRICTED S000 TERUPDATE
+                        </h2>
+                        <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=770971417#gid=770971417" target="_blank" rel="noreferrer" className="text-[#2A446C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                            Sumber Data <ExternalLink size={10} />
+                        </a>
+                    </div>
+                    
+                    <div className="flex flex-col gap-4">
+                        <div className="bg-[#F0F4F8] border border-[#E2E8F0] rounded-sm p-4 shadow-inner flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div>
+                                <span className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">Total Keseluruhan Value</span>
+                                <span className="text-xl font-black text-[#1D2B36] block">{formatRupiah(finalUnrestrictedTotal)}</span>
+                            </div>
+                            <button 
+                                onClick={() => setShowUnrestrictedBreakdown(!showUnrestrictedBreakdown)}
+                                className="bg-[#2A446C] hover:bg-[#1C2541] text-white px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm"
+                            >
+                                {showUnrestrictedBreakdown ? 'Hide Breakdown' : 'View Breakdown'}
+                            </button>
+                        </div>
+                        
+                        {showUnrestrictedBreakdown && (
+                            <div className="overflow-x-auto border-t border-slate-100 pt-2">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-[#2A446C] text-white text-[10px] font-black uppercase tracking-wider">
+                                            <th className="p-3 w-1/2">SITE / PLANT</th>
+                                            <th className="p-3 w-1/2 text-right">VALUE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-xs text-slate-700">
+                                        {Object.keys(finalValueBreakdown).length > 0 ? (
+                                            Object.entries(finalValueBreakdown).sort((a,b) => b[1] - a[1]).map(([site, val], idx) => (
+                                                <tr key={idx} className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                                                    <td className="p-3 font-bold border-r border-slate-100">{site}</td>
+                                                    <td className="p-3 text-right font-mono">{formatRupiah(val)}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="2" className="p-4 text-center text-slate-500 font-bold text-xs bg-slate-50">Menarik rincian breakdown data site...</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
-                            <rect x="480" y="50" width="60" height="200" fill="#E2E8F0" rx="4" />
-                            <text x="510" y="270" fill="#4B5563" fontSize="11" fontWeight="bold" textAnchor="middle">Target Value</text>
-                            <text x="510" y="40" fill="#64748B" fontSize="10" fontWeight="bold" textAnchor="middle">Rp 30.37 M</text>
+                {}
+                <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm mt-6">
+                    <div className="flex justify-between items-end border-b border-gray-100 pb-3 mb-4">
+                        <h2 className="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2">
+                            <Activity className="text-[#2A446C]" size={18} />
+                            REKONSILIASI SELISIH (GAP) VALUE
+                        </h2>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div className="bg-[#F0F4F8] p-4 rounded-sm border border-[#E2E8F0] shadow-sm flex flex-col justify-center">
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">Total Value Di-Reduce</p>
+                            <h3 className="text-base lg:text-lg font-black text-[#1D2B36]">{formatRupiah(displayFinalValue)}</h3>
+                        </div>
+                        <div className="bg-[#F0F4F8] p-4 rounded-sm border border-[#E2E8F0] shadow-sm flex flex-col justify-center">
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">- Total Value BA</p>
+                            <h3 className="text-base lg:text-lg font-black text-[#2A446C]">{formatRupiah(valueBA)}</h3>
+                        </div>
+                        <div className="bg-[#F0F4F8] p-4 rounded-sm border border-[#E2E8F0] shadow-sm flex flex-col justify-center">
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">- S000 Terupdate</p>
+                            <h3 className="text-base lg:text-lg font-black text-[#3A5A61]">{formatRupiah(finalUnrestrictedTotal)}</h3>
+                        </div>
+                        <div className={`p-4 rounded-sm border shadow-sm flex flex-col justify-center ${selisihValue > 0 ? 'bg-amber-50 border-amber-200' : selisihValue < 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'}`}>
+                            <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${selisihValue > 0 ? 'text-amber-700' : selisihValue < 0 ? 'text-red-700' : 'text-emerald-700'}`}>= Selisih (Gap)</p>
+                            <h3 className={`text-base lg:text-lg font-black ${selisihValue > 0 ? 'text-amber-600' : selisihValue < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{formatRupiah(selisihValue)}</h3>
+                            <p className={`mt-1.5 pt-1.5 border-t text-[8px] font-bold uppercase leading-relaxed ${selisihValue > 0 ? 'text-amber-800 border-amber-200/50' : selisihValue < 0 ? 'text-red-800 border-red-200/50' : 'text-emerald-800 border-emerald-200/50'}`}>
+                                *Justifikasi: Waiting BA Tervalidasi/ BA yang sdh tervalidasi sebelum Cut Off di lakukan Distribution Center.
+                            </p>
+                        </div>
+                    </div>
 
-                            <rect x="550" y={250 - valueHeight} width="60" height={valueHeight} fill="#3A5A61" rx="4" className="transition-all duration-1000" />
-                            <text x="580" y="285" fill="#3A5A61" fontSize="11" fontWeight="black" textAnchor="middle">Actual (Reduce)</text>
-                            <text x="580" y={240 - valueHeight} fill="#3A5A61" fontSize="11" fontWeight="black" textAnchor="middle">Rp {(actualQcValue/1000000000).toFixed(2)} M</text>
-
-                            <line x1="400" y1="30" x2="400" y2="290" stroke="#F3F4F6" strokeWidth="2" strokeDasharray="5,5" />
-                        </svg>
+                    <div>
+                        <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-2 uppercase">
+                            <span>Komposisi Nilai Ter-Reduce</span>
+                            <span>100% = {formatRupiah(displayFinalValue)}</span>
+                        </div>
+                        <div className="w-full h-8 flex rounded-sm overflow-hidden bg-slate-100 border border-slate-200">
+                            <div className="bg-[#2A446C] h-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden transition-all duration-1000" style={{ width: `${pctBA}%` }} title={`BA: ${formatRupiah(valueBA)}`}>
+                                {pctBA > 5 && `BA (${pctBA.toFixed(1)}%)`}
+                            </div>
+                            <div className="bg-[#3A5A61] h-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden transition-all duration-1000" style={{ width: `${pctS000}%` }} title={`S000: ${formatRupiah(finalUnrestrictedTotal)}`}>
+                                {pctS000 > 5 && `S000 (${pctS000.toFixed(1)}%)`}
+                            </div>
+                            <div className={`${selisihValue > 0 ? 'bg-amber-400' : 'bg-red-500'} h-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden transition-all duration-1000`} style={{ width: `${pctSelisih}%` }} title={`Gap: ${formatRupiah(selisihValue)}`}>
+                                {pctSelisih > 3 && `Gap (${pctSelisih.toFixed(1)}%)`}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2214,9 +2721,17 @@
                             <Database className="text-[#2A446C]" size={18} />
                             SUMMARY PENYERAPAN ALL SITE STATUS BLOCK
                         </h2>
-                        <span className="text-[10px] text-slate-400 font-bold hidden sm:inline border border-slate-200 px-2 py-1 rounded bg-slate-50 shadow-sm">
-                            LIVE GOOGLE SHEETS
-                        </span>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] text-slate-400 font-bold hidden sm:inline border border-slate-200 px-2 py-1 rounded bg-slate-50 shadow-sm">
+                                LIVE GOOGLE SHEETS
+                            </span>
+                            <button 
+                                onClick={() => setShowPenyerapanBreakdown(!showPenyerapanBreakdown)}
+                                className="bg-[#2A446C] hover:bg-[#1C2541] text-white px-4 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm"
+                            >
+                                {showPenyerapanBreakdown ? 'Hide Data' : 'View Data'}
+                            </button>
+                        </div>
                     </div>
                     
                     {isLoadingPenyerapan ? (
@@ -2224,7 +2739,7 @@
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2A446C]"></div>
                             <span className="ml-3 text-sm font-bold text-slate-500 uppercase tracking-wider">Menarik Data Status Block...</span>
                         </div>
-                    ) : (
+                    ) : showPenyerapanBreakdown ? (
                         <div className="space-y-6">
                             <div className="bg-[#F0F4F8] p-5 rounded-sm border border-[#E2E8F0] shadow-inner flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div className="flex flex-col w-full md:w-auto">
@@ -2316,6 +2831,10 @@
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    ) : (
+                        <div className="p-4 text-center text-slate-500 font-bold text-xs bg-slate-50 border border-slate-100 rounded-sm">
+                            Klik tombol "View Data" untuk menampilkan detail total penyerapan dan breakdown site.
                         </div>
                     )}
                 </div>
@@ -2469,12 +2988,28 @@
                     Achievement Progress: Plan vs Actual (Item)
                   </h2>
                   
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                     <div className="bg-[#FAFAFA] p-3 rounded-sm border border-gray-200 border-l-4 border-l-[#8C231C] shadow-sm flex flex-col justify-center">
                       <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 break-words">Total Item Ter-QC</p>
                       <h3 className="text-lg sm:text-xl font-black text-[#1D2B36] break-words">
                          {isLoading ? <span className="animate-pulse">Loading...</span> : actualQcCount}
                       </h3>
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                         <p className="text-[8px] text-slate-500 leading-tight font-medium">
+                            *Catatan: Terdapat data duplikat yang ter-QC berulang kali. Secara aktual aktivitas QC lebih banyak, namun karena perhitungan saat ini berdasarkan kode material unik, maka angka yang tampil lebih kecil. <a href="https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/edit?gid=2001975386#gid=2001975386" target="_blank" rel="noreferrer" className="text-[#8C231C] hover:underline font-bold inline-flex items-center gap-0.5 mt-0.5">Cek Data Duplikat <ExternalLink size={8} /></a>
+                         </p>
+                      </div>
+                    </div>
+                    <div className="bg-[#FAFAFA] p-3 rounded-sm border border-gray-200 border-l-4 border-l-[#8C231C] shadow-sm flex flex-col justify-center">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 break-words">Total Aktual + Duplikat</p>
+                      <h3 className="text-lg sm:text-xl font-black text-[#1D2B36] break-words">
+                         {isLoading ? <span className="animate-pulse">Loading...</span> : grandTotalCount}
+                      </h3>
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                         <p className="text-[8px] text-slate-500 leading-tight font-medium">
+                            Unique QC ({actualQcCount}) + Duplikat Done QC ({duplicateCount}). Data disesuaikan untuk Kurva & Persentase.
+                         </p>
+                      </div>
                     </div>
                     <div className="bg-[#FAFAFA] p-3 rounded-sm border border-gray-200 border-l-4 border-l-[#3A5A61] shadow-sm flex flex-col justify-center">
                       <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 break-words">Persentase Dari Plan</p>
@@ -2484,8 +3019,8 @@
                     </div>
                     <div className="bg-[#FAFAFA] p-3 rounded-sm border border-gray-200 border-l-4 border-l-[#8C231C] shadow-sm flex flex-col justify-center">
                       <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 break-words">Pencapaian Value</p>
-                      <h3 className="text-xs sm:text-sm lg:text-base font-black text-[#1D2B36] break-all" title={formatRupiah(actualQcValue)}>
-                         {isLoading ? <span className="animate-pulse">Loading...</span> : formatRupiah(actualQcValue)}
+                      <h3 className="text-xs sm:text-sm lg:text-base font-black text-[#1D2B36] break-all" title={formatRupiah(grandTotalValue)}>
+                         {isLoading ? <span className="animate-pulse">Loading...</span> : formatRupiah(grandTotalValue)}
                       </h3>
                     </div>
                     <div className="bg-[#FAFAFA] p-3 rounded-sm border border-gray-200 border-l-4 border-l-[#3A5A61] shadow-sm flex flex-col justify-center">
@@ -2600,6 +3135,12 @@
                         <Database size={14} className="text-[#3A5A61] shrink-0 mt-0.5" />
                         <p className="text-[10px] text-slate-700 leading-relaxed font-medium flex-1">
                            <span className="font-bold">Sumber Data Actual:</span> <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1584029697#gid=1584029697" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all inline-flex items-center gap-1 hover:text-blue-800 transition-colors">"https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1584029697#gid=1584029697" <ExternalLink size={10} /></a>
+                        </p>
+                     </div>
+                     <div className="flex items-start gap-2">
+                        <Database size={14} className="text-[#3A5A61] shrink-0 mt-0.5" />
+                        <p className="text-[10px] text-slate-700 leading-relaxed font-medium flex-1">
+                           <span className="font-bold">Sumber Data Actual 2 (Resume Khusus Tahap 2 - {actualQcCount} Item Ter-QC beserta Value {formatRupiah(actualQcValue)}):</span> <a href={resumeCsvUrl || '#'} download="Resume_QC_Tahap2.xls" className="text-blue-600 hover:underline break-all inline-flex items-center gap-1 hover:text-blue-800 transition-colors">Unduh Format File Excel (Resume Aktual Tahap 2) <ExternalLink size={10} /></a>
                         </p>
                      </div>
                   </div>

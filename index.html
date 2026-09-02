@@ -71,6 +71,7 @@
       const [showPenyerapanBreakdown, setShowPenyerapanBreakdown] = useState(false);
       const [showDiReduceModal, setShowDiReduceModal] = useState(false);
       const [finalValueDiReduceBreakdown, setFinalValueDiReduceBreakdown] = useState({});
+      const [eliminatedCount, setEliminatedCount] = useState(0);
 
       // 6 Dokumentasi final dengan ID yang unik dan menggunakan format Thumbnail API
       const ccpData = [
@@ -626,10 +627,42 @@
         return () => clearInterval(intervalId);
       }, []);
 
+      useEffect(() => {
+        let intervalId;
+        const fetchEliminatedCount = async () => {
+            try {
+                const csvUrl = 'https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/export?format=csv&gid=1605736205';
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error("Gagal load CSV Eliminated");
+                const csvText = await response.text();
+                
+                const rawLines = csvText.split(/\r?\n/);
+                if (rawLines.length > 0) {
+                    let count = 0;
+                    // Mulai iterasi dari 1 untuk melewati baris header
+                    for(let i = 1; i < rawLines.length; i++) {
+                        // Memastikan baris tidak kosong (mengabaikan deretan koma kosong)
+                        if (rawLines[i].replace(/,/g, '').trim() !== '') {
+                            count++;
+                        }
+                    }
+                    setEliminatedCount(count);
+                }
+            } catch (err) {
+                console.warn("Gagal mengambil data Eliminated Item Count:", err);
+            }
+        };
+        
+        fetchEliminatedCount();
+        intervalId = setInterval(fetchEliminatedCount, 60000);
+        return () => clearInterval(intervalId);
+      }, []);
+
       const duplicateCount = 1756;
       const duplicateValue = actualQcCount > 0 ? Math.round((actualQcValue / actualQcCount) * duplicateCount) : 0;
-      const grandTotalCount = actualQcCount + duplicateCount;
-      const grandTotalValue = actualQcValue + duplicateValue;
+      const eliminatedValue = actualQcCount > 0 ? Math.round((actualQcValue / actualQcCount) * eliminatedCount) : 0;
+      const grandTotalCount = actualQcCount + duplicateCount + eliminatedCount;
+      const grandTotalValue = actualQcValue + duplicateValue + eliminatedValue;
 
       const qcPercentage = ((grandTotalCount / 6418) * 100).toFixed(1);
       const qcValuePercentage = ((grandTotalValue / 30372979447) * 100).toFixed(1); 
@@ -3003,13 +3036,13 @@
                       </div>
                     </div>
                     <div className="bg-[#FAFAFA] p-3 rounded-sm border border-gray-200 border-l-4 border-l-[#8C231C] shadow-sm flex flex-col justify-center">
-                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 break-words">Total Aktual + Duplikat</p>
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 break-words">Total Aktual + Duplikat + Tereliminasi</p>
                       <h3 className="text-lg sm:text-xl font-black text-[#1D2B36] break-words">
                          {isLoading ? <span className="animate-pulse">Loading...</span> : grandTotalCount}
                       </h3>
                       <div className="mt-2 pt-2 border-t border-gray-200">
                          <p className="text-[8px] text-slate-500 leading-tight font-medium">
-                            Unique QC ({actualQcCount}) + Duplikat Done QC ({duplicateCount}). Data disesuaikan untuk Kurva & Persentase.
+                            Unique QC ({actualQcCount}) + Duplikat ({duplicateCount}) + Tereliminasi ({eliminatedCount}). Data disesuaikan untuk Kurva & Persentase.
                          </p>
                       </div>
                     </div>

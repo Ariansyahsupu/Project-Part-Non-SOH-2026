@@ -43,7 +43,8 @@
           Lock,
           AlertTriangle,
           LogIn,
-          Bell
+          Bell,
+          FileText
         } from 'lucide-react';
 
     const App = () => {
@@ -88,6 +89,111 @@
       const [alarmData, setAlarmData] = useState([]);
       const [alarmHeaders, setAlarmHeaders] = useState([]);
       const [isLoadingAlarm, setIsLoadingAlarm] = useState(false);
+      const [showJustifikasiModal, setShowJustifikasiModal] = useState(false);
+      const [justifikasiData, setJustifikasiData] = useState({ headers: [], rows: [] });
+      const [isLoadingJustifikasi, setIsLoadingJustifikasi] = useState(false);
+
+      // Data Justifikasi Hardcoded Sesuai Instruksi
+      const justifikasiReportData = {
+          kendala: [
+              { kategori: "Kondisi Material (Fase 3)", kondisi: "Sisa material 646 item berdimensi besar / heavy part.", dampak: "Handling time lama, produktivitas turun drastis (hanya 20 item/MP/hari).", usulan: "Adjustment waktu Fase 3 menjadi 21 hari kalender.", urgensi: "Tinggi", urgensiColor: "text-amber-600 bg-amber-50 border-amber-200" },
+              { kategori: "Jadwal Manpower (Fase 3)", kondisi: "4 MP menerapkan roster 5:2 (5 hari kerja, 2 libur).", dampak: "Kekurangan MP di hari tertentu, tim harian rata-rata tidak full 4 orang.", usulan: "Pengajuan perpanjangan waktu agar tim tidak kelelahan.", urgensi: "Tinggi", urgensiColor: "text-amber-600 bg-amber-50 border-amber-200" },
+              { kategori: "Manpower Fase 4", kondisi: "Tidak ada MP Staff untuk admin/doc controller.", dampak: "Administrasi & verifikasi fisik Fase 4 (429 item box) terbengkalai.", usulan: "Penambahan 1 MP Staff (Admin) dan realokasi 2 MP Harian setelah Fase 3.", urgensi: "Tinggi", urgensiColor: "text-amber-600 bg-amber-50 border-amber-200" },
+              { kategori: "Alat Support (Forklift)", kondisi: "Tidak ada FL dedicated di DC, sistem sharing dengan Plant.", dampak: "Pemindahan material besar & segregasi box lambat / idle time tinggi.", usulan: "Alokasi 1 unit FL dedicated atau sewa temporer (rental).", urgensi: "Kritis", urgensiColor: "text-red-600 bg-red-50 border-red-200" }
+          ],
+          bebanKerja: [
+              { fase: "Fase 3 (QC Fisik Material Besar)", sisaItem: "646 Item", setupMp: "4 MP (Sistem Roster 5:2)", kapasitas: "Rata-rata ~57 Item/hari (Akibat libur bergantian)", estimasi: "12 Hari" },
+              { fase: "Fase 4 (Segregasi & Admin)", sisaItem: "429 Item (Dalam Box)", setupMp: "1 MP Staff (Baru) + 2 MP Harian", kapasitas: "21 Item / Tim (Estimasi waktu bongkar & antri FL)", estimasi: "11 Hari" }
+          ],
+          roadmap: [
+              { fase: "Fase 3", aktivitas: "Penyelesaian QC Material Dimensi Besar", durasi: "12 Hari", status: "Kapasitas per orang turun (20 item/hari) akibat handling sulit & terpotong roster." },
+              { fase: "Fase 4", aktivitas: "Unboxing, Segregasi, & Administrasi (429 Item)", durasi: "5 Hari", status: "Butuh penambahan 1 MP Staff Admin + 2 MP (1 MP Penggantian MP Harian mengundurkan diri , 1 MP penambahan di luar MP Exixting" },
+              { fase: "Fase 5", aktivitas: "Analisis Akar Masalah & PICA Final Difference", durasi: "4 Hari", status: "Dikerjakan paralel oleh Admin Staff yang baru." },
+              { fase: "Fase 6", aktivitas: "Sign-off & Closing Project", durasi: "3 Hari", status: "Proses approval Dept Head." },
+              { fase: "TOTAL", aktivitas: "WAKTU MENUJU CLOSE PROJECT", durasi: "24 Hari", status: "(Terhitung sejak berjalannya penyesuaian baru)", isTotal: true }
+          ],
+          planMpFase3: {
+              variabel: [
+                  { nama: "Jumlah Manpower (MP) Total", nilai: "4", satuan: "Orang (Sistem Roster 5:2)" },
+                  { nama: "Waktu Kerja per MP", nilai: "420", satuan: "Menit (7 Jam Efektif)" },
+                  { nama: "Durasi Siklus (Cycle Time) per Item", nilai: "23", satuan: "Menit / Item (Handling Material Besar)" },
+                  { nama: "Efisiensi Kerja (Allowances)", nilai: "85%", satuan: "-" }
+              ],
+              simulasi: [
+                  { komponen: "Total Manpower (MP)", rumus: "-", hasil: "4 Orang" },
+                  { komponen: "Jadwal Kerja per MP", rumus: "5 Hari Kerja / Minggu", hasil: "-" },
+                  { komponen: "Total Kapasitas Mingguan", rumus: "4 Orang × 5 Hari", hasil: "20 Man-days" },
+                  { komponen: "Total Hari Operasional", rumus: "-", hasil: "7 Hari" },
+                  { komponen: "Rata-rata Kehadiran Harian", rumus: "20 Man-days ÷ 7 Hari", hasil: "2,85 Orang / Hari" }
+              ],
+              formasi: [
+                  { nama: "Kehadiran 3 MP", hari: "6 Hari", total: "18 Man-days (6 × 3)" },
+                  { nama: "Kehadiran 2 MP", hari: "1 Hari", total: "2 Man-days (1 × 2)" },
+                  { nama: "Total Mingguan", hari: "7 Hari", total: "20 Man-days", isTotal: true }
+              ],
+              indikator: [
+                  { nama: "Waktu Tersedia / Efektif per MP", rumus: "Waktu Kerja", gross: "420 Menit", net: "357 Menit" },
+                  { nama: "Kapasitas Output per MP", rumus: "Waktu / 23", gross: "18.26 Item", net: "~15 Item" },
+                  { nama: "Kapasitas Rata-rata 3 MP Aktif", rumus: "15 Item x 3", gross: "54.7 Item", net: "45 Item" },
+                  { nama: "Kapasitas Rata-rata 2 MP Aktif", rumus: "15 Item x 2", gross: "36.5 Item", net: "30 Item" }
+              ],
+              tracking: [
+                  { hariKe: 1, hari: "Senin", mp: 3, kapasitas: 45, kumulatif: 45 },
+                  { hariKe: 2, hari: "Selasa", mp: 3, kapasitas: 45, kumulatif: 90 },
+                  { hariKe: 3, hari: "Rabu", mp: 3, kapasitas: 45, kumulatif: 135 },
+                  { hariKe: 4, hari: "Kamis", mp: 3, kapasitas: 45, kumulatif: 180 },
+                  { hariKe: 5, hari: "Jumat", mp: 3, kapasitas: 45, kumulatif: 225 },
+                  { hariKe: 6, hari: "Sabtu", mp: 2, kapasitas: 30, kumulatif: 255 },
+                  { hariKe: 7, hari: "Minggu", mp: 3, kapasitas: 45, kumulatif: 300 },
+                  { hariKe: 8, hari: "Senin", mp: 3, kapasitas: 45, kumulatif: 345 },
+                  { hariKe: 9, hari: "Selasa", mp: 3, kapasitas: 45, kumulatif: 390 },
+                  { hariKe: 10, hari: "Rabu", mp: 3, kapasitas: 45, kumulatif: 435 },
+                  { hariKe: 11, hari: "Kamis", mp: 3, kapasitas: 45, kumulatif: 480 },
+                  { hariKe: 12, hari: "Jumat", mp: 3, kapasitas: 45, kumulatif: 525 },
+                  { hariKe: 13, hari: "Sabtu", mp: 2, kapasitas: 30, kumulatif: 555 },
+                  { hariKe: 14, hari: "Minggu", mp: 3, kapasitas: 45, kumulatif: 600 },
+                  { hariKe: 15, hari: "Senin", mp: 3, kapasitas: 46, kumulatif: 646 }
+              ]
+          },
+          planMpFase4: {
+              variabel: [
+                  { nama: "Target Sisa Pekerjaan", nilai: "429", ket: "Item (Kondisi tersimpan di dalam Box)" },
+                  { nama: "Kebutuhan Manpower", nilai: "3 Orang", ket: "1 MP Staff Admin (Baru) + 2 MP Harian (Fisik)" },
+                  { nama: "Sistem Roster (Jadwal)", nilai: "13:1 & 5:2", ket: "Admin (13 hari kerja, 1 libur) | MP Fisik (5 hari kerja, 2 libur)" },
+                  { nama: "Kendala / Bottleneck", nilai: "Tinggi", ket: "Proses Unboxing, pencocokan fisik BAP, antri Forklift (sharing)" },
+                  { nama: "Kapasitas Output Maksimal", nilai: "30", ket: "Item / Hari (Hanya tercapai jika formasi 3 orang lengkap)" }
+              ],
+              simulasi: [
+                  { nama: "Total Item Pekerjaan", rumus: "-", hasil: "429 Item" },
+                  { nama: "Kapasitas Harian Tim", rumus: "-", hasil: "30 Item / Hari" },
+                  { nama: "Estimasi Waktu Netto", rumus: "429 Item ÷ 21 Item / Hari", hasil: "21 Hari Kerja" },
+                  { nama: "Waktu Aktual / Dibulatkan", rumus: "-", hasil: "21 Hari Kerja" }
+              ],
+              tracking: [
+                  { hariKe: 1, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 30 },
+                  { hariKe: 2, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 60 },
+                  { hariKe: 3, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 2 (Libur)", kapasitas: "15", kumulatif: 75 },
+                  { hariKe: 4, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 2 (Libur)", kapasitas: "15", kumulatif: 90 },
+                  { hariKe: 5, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 120 },
+                  { hariKe: 6, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 1 (Libur)", kapasitas: "15", kumulatif: 135 },
+                  { hariKe: 7, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 1 (Libur)", kapasitas: "15", kumulatif: 150 },
+                  { hariKe: 8, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 180 },
+                  { hariKe: 9, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 210 },
+                  { hariKe: 10, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 2 (Libur)", kapasitas: "15", kumulatif: 225 },
+                  { hariKe: 11, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 2 (Libur)", kapasitas: "15", kumulatif: 240 },
+                  { hariKe: 12, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 270 },
+                  { hariKe: 13, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 1 (Libur)", kapasitas: "15", kumulatif: 285 },
+                  { hariKe: 14, formasi: "0 Admin + 1 MP Fisik", libur: "Admin Libur (Sistem Stop)", kapasitas: "0", kumulatif: 285 },
+                  { hariKe: 15, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 315 },
+                  { hariKe: 16, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 345 },
+                  { hariKe: 17, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 2 (Libur)", kapasitas: "15", kumulatif: 360 },
+                  { hariKe: 18, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 2 (Libur)", kapasitas: "15", kumulatif: 375 },
+                  { hariKe: 19, formasi: "1 Admin + 2 MP Fisik", libur: "Lengkap", kapasitas: "30", kumulatif: 405 },
+                  { hariKe: 20, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 1 (Libur)", kapasitas: "15", kumulatif: 420 },
+                  { hariKe: 21, formasi: "1 Admin + 1 MP Fisik", libur: "MP Fisik 1 (Libur)", kapasitas: "9*", kumulatif: 429 }
+              ]
+          }
+      };
 
       // 6 Dokumentasi final dengan ID yang unik dan menggunakan format Thumbnail API
       const ccpData = [
@@ -839,7 +945,6 @@
                 const rawLines = csvText.split(/\r?\n/);
                 if (rawLines.length > 0) {
                     const headers = parseCsvRow(rawLines[0]).map(h => h.trim().toLowerCase());
-                    const qtyIndex = headers.findIndex(h => h === 'qty' || h.includes('qty') || h === 'kuantitas');
                     const valueIndex = headers.findIndex(h => h.includes('value') || h.includes('total value') || h.includes('harga'));
 
                     let count = 0;
@@ -850,13 +955,8 @@
                         const row = parseCsvRow(rawLines[i]);
                         
                         if (row.join('').replace(/,/g,'').trim() !== '') {
-                            if (qtyIndex !== -1 && row[qtyIndex]) {
-                                const qVal = parseFloat(row[qtyIndex].replace(/,/g, '').replace(/"/g, ''));
-                                if(!isNaN(qVal) && qVal > 0) count += qVal;
-                                else count++;
-                            } else {
-                                count++;
-                            }
+                            // Hanya menghitung baris (item list), bukan menjumlahkan Qty (Kuantitas)
+                            count++;
 
                             if (valueIndex !== -1 && row[valueIndex]) {
                                 let valStr = row[valueIndex].toString();
@@ -937,6 +1037,55 @@
               fetchAlarm();
           }
       }, [showAlarmModal, alarmData.length]);
+
+      useEffect(() => {
+          if (showJustifikasiModal && justifikasiData.rows.length === 0) {
+              setIsLoadingJustifikasi(true);
+              const fetchJustifikasi = async () => {
+                  try {
+                      const csvUrl = 'https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/export?format=csv&gid=711150512';
+                      const response = await fetch(csvUrl);
+                      const text = await response.text();
+                      
+                      const parseCsvRow = (text) => {
+                          const result = [];
+                          let cell = '';
+                          let inQuotes = false;
+                          for (let i = 0; i < text.length; i++) {
+                              const char = text[i];
+                              if (char === '"') {
+                                  inQuotes = !inQuotes;
+                              } else if (char === ',' && !inQuotes) {
+                                  result.push(cell);
+                                  cell = '';
+                              } else {
+                                  cell += char;
+                              }
+                          }
+                          result.push(cell);
+                          return result;
+                      };
+
+                      const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                      if (lines.length > 0) {
+                         const headers = parseCsvRow(lines[0]);
+                         let parsedData = [];
+                         for(let i=1; i<lines.length; i++) {
+                             const row = parseCsvRow(lines[i]);
+                             if (row.length === 0 || (row.length === 1 && row[0].trim() === '')) continue;
+                             parsedData.push(row);
+                         }
+                         setJustifikasiData({ headers, rows: parsedData });
+                      }
+                  } catch (e) {
+                      console.error('Failed to fetch Justifikasi data', e);
+                  } finally {
+                      setIsLoadingJustifikasi(false);
+                  }
+              };
+              fetchJustifikasi();
+          }
+      }, [showJustifikasiModal, justifikasiData.rows.length]);
 
       useEffect(() => {
           if (view === 'gsto' && isAuthenticatedGsto) {
@@ -1052,39 +1201,39 @@
         { 
           fase: "Fase 3: Kalibrasi Fisik (Non-SOH)", aktivitas: "Stock Take & Eksekusi Swap", 
           subAktivitas: "Penghitungan fisik + paralel input oleh Admin SAP dan Doc Controller", 
-          durasi: "36 Hari", start: "27 Jul 2026", end: "31 Aug 2026", 
+          durasi: "56 Hari", start: "27 Jul 2026", end: "20 Sep 2026", 
           deliverable: "SOH Ter-update & Discrepancy tertutup", qualityGate: "Validasi dokumen harian oleh Doc Controller", status: "in-progress"
         },
         { 
           fase: "Fase 4: Eksekusi Reduksi & Disposal", aktivitas: "Segregasi & Administrasi", 
           subAktivitas: "Pemisahan fisik sisa barang unmatch & verifikasi temuan Barang Unmact dan Mact to S000", 
-          durasi: "11 Hari", start: "04 Sep 2026", end: "14 Sep 2026", 
+          durasi: "21 Hari", start: "04 Sep 2026", end: "24 Sep 2026", 
           deliverable: "Berita Acara Eksekusi Aset", qualityGate: "Kesesuaian fisik ter verifikasi temuan Barang Unmact dan Mact to S000", status: "in-progress"
         },
         { 
           fase: "Fase 5: PICA Final Difference", aktivitas: "Analisis Akar Masalah", 
           subAktivitas: "Penelusuran penyebab sisa selisih", 
-          durasi: "5 Hari", start: "15 Sep 2026", end: "19 Sep 2026", 
+          durasi: "5 Hari", start: "25 Sep 2026", end: "29 Sep 2026", 
           deliverable: "Dokumen PICA Final Difference", qualityGate: "Akar masalah logis & faktual", status: "pending"
         },
         { 
           fase: "Fase 6: Approval & Pengesahan", aktivitas: "Sign-off & Closing", 
           subAktivitas: "Rapat finalisasi proyek & pengesahan", 
-          durasi: "6 Hari", start: "20 Sep 2026", end: "25 Sep 2026", 
+          durasi: "6 Hari", start: "30 Sep 2026", end: "05 Oct 2026", 
           deliverable: "Sign-off Project", qualityGate: "Persetujuan Dept Head", status: "pending"
         }
       ];
 
       const TOTAL_PLAN_VALUE = 30372979447;
       
-      // Meng-generate target kurva proporsional yang memanjang sampai batas akhir 31 Agustus
+      // Meng-generate target kurva proporsional yang memanjang sampai batas akhir 20 September (Adjustment)
       const generateBaseDates = () => {
         const dates = [{ date: '25 Jul', plan: 0 }];
-        const totalDays = 37; // 26 Juli s.d 31 Agustus
+        const totalDays = 57; // 26 Juli s.d 20 September
         const target = 6418;
         for (let i = 1; i <= totalDays; i++) {
           let d = new Date(2026, 6, 25 + i); // 6 adalah Index Bulan Juli
-          let monthStr = d.getMonth() === 6 ? 'Jul' : 'Aug';
+          let monthStr = d.getMonth() === 6 ? 'Jul' : (d.getMonth() === 7 ? 'Aug' : 'Sep');
           let dayStr = d.getDate().toString().padStart(2, '0');
           let planVal = Math.round((i / totalDays) * target);
           dates.push({ date: `${dayStr} ${monthStr}`, plan: planVal });
@@ -1104,7 +1253,7 @@
 
       const progressData = baseDates.map((d) => {
           const parts = d.date.split(' ');
-          const monthIdx = parts[1] === 'Jul' ? 6 : 7;
+          const monthIdx = parts[1] === 'Jul' ? 6 : (parts[1] === 'Aug' ? 7 : 8);
           const dateObj = new Date(2026, monthIdx, parseInt(parts[0], 10));
           
           if (dateObj > eodToday) {
@@ -1124,10 +1273,11 @@
           };
       });
 
-      const getProgressSvgPath = (dataKey, maxVal) => {
+      const getProgressSvgPath = (dataKey, maxVal, startIndex = 0, endIndex = progressData.length - 1) => {
         let isFirst = true;
         return progressData
           .map((d, index) => {
+            if (index < startIndex || index > endIndex) return null;
             if (d[dataKey] === null) return null;
             const x = 50 + index * (710 / (progressData.length - 1));
             const y = 400 - (d[dataKey] / maxVal) * 360; 
@@ -1138,6 +1288,9 @@
           .filter(p => p !== null)
           .join(' ');
       };
+
+      const sep1Index = progressData.findIndex(d => d.date === '01 Sep');
+      const sep1X = sep1Index !== -1 ? 50 + sep1Index * (710 / (progressData.length - 1)) : -1;
 
       const rawHtmlTahap2 = `
 <!DOCTYPE html>
@@ -1528,7 +1681,7 @@
                                     <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
                                         <div class="flex items-center justify-between mb-1">
                                             <span class="text-[9px] font-black uppercase tracking-wider text-[#2A446C]">Berjalan</span>
-                                            <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">27 Jul - 09 Aug 2026</span>
+                                            <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">27 Jul - 20 Sep 2026</span>
                                         </div>
                                         <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 3: Kalibrasi Fisik (Non-SOH)</h3>
                                         <p class="text-[10px] text-slate-400 mt-1 font-semibold">Stock Take & Eksekusi Swap</p>
@@ -1541,7 +1694,7 @@
                                     <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
                                         <div class="flex items-center justify-between mb-1">
                                             <span class="text-[9px] font-black uppercase tracking-wider text-[#2A446C]">Berjalan (Paralel)</span>
-                                            <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">04 Sep - 14 Sep 2026</span>
+                                            <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">04 Sep - 24 Sep 2026</span>
                                         </div>
                                         <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 4: Eksekusi Reduksi & Disposal</h3>
                                         <p class="text-[10px] text-slate-400 mt-1 font-semibold">Segregasi & Administrasi</p>
@@ -1554,7 +1707,7 @@
                                     <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
                                         <div class="flex items-center justify-between mb-1">
                                             <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Belum Mulai</span>
-                                            <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">15 Sep - 19 Sep 2026</span>
+                                            <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">25 Sep - 29 Sep 2026</span>
                                         </div>
                                         <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 5: PICA Final Difference</h3>
                                         <p class="text-[10px] text-slate-400 mt-1 font-semibold">Analisis Akar Masalah</p>
@@ -1567,7 +1720,7 @@
                                     <div class="w-[calc(100%-3rem)] p-4 rounded-sm border border-gray-100 bg-[#FAFAFA] shadow-sm ml-4">
                                         <div class="flex items-center justify-between mb-1">
                                             <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Belum Mulai</span>
-                                            <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">20 Sep - 25 Sep 2026</span>
+                                            <span class="text-[9px] text-slate-400 font-bold bg-white px-2 py-0.5 rounded border border-gray-200 font-mono">30 Sep - 05 Oct 2026</span>
                                         </div>
                                         <h3 class="font-bold text-xs text-slate-800 leading-tight">Fase 6: Approval & Pengesahan</h3>
                                         <p class="text-[10px] text-slate-400 mt-1 font-semibold">Sign-off & Closing</p>
@@ -1645,9 +1798,9 @@
                                     <td class="p-3 font-extrabold text-[#1D2B36] border-r">Fase 3: Kalibrasi Fisik (Non-SOH)</td>
                                     <td class="p-3 font-bold border-r">Stock Take & Eksekusi Swap</td>
                                     <td class="p-3 border-r">Penghitungan fisik + paralel input oleh 2 Admin SAP & 1 Doc Controller</td>
-                                    <td class="p-3 text-center font-bold border-r">36 Hari</td>
+                                    <td class="p-3 text-center font-bold border-r">56 Hari</td>
                                     <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">27 Jul 2026</td>
-                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">31 Aug 2026</td>
+                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">20 Sep 2026</td>
                                     <td class="p-3 font-semibold border-r">SOH Ter-update & Discrepancy tertutup</td>
                                     <td class="p-3 border-r">Validasi dokumen harian oleh Doc Controller</td>
                                     <td class="p-3 text-center"><span class="bg-[#1C2541] text-white text-[9px] font-black uppercase px-2 py-1 rounded-sm animate-pulse">Berjalan</span></td>
@@ -1656,9 +1809,9 @@
                                     <td class="p-3 font-extrabold text-[#1D2B36] border-r">Fase 4: Eksekusi Reduksi & Disposal</td>
                                     <td class="p-3 font-bold border-r">Segregasi & Administrasi</td>
                                     <td class="p-3 border-r">Pemisahan fisik sisa barang unmatch & verifikasi temuan Barang Unmact dan Mact to S000</td>
-                                    <td class="p-3 text-center font-bold border-r">4 Minggu</td>
+                                    <td class="p-3 text-center font-bold border-r">21 Hari</td>
                                     <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">04 Sep 2026</td>
-                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">14 Sep 2026</td>
+                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">24 Sep 2026</td>
                                     <td class="p-3 font-semibold border-r">Berita Acara Eksekusi Aset</td>
                                     <td class="p-3 border-r">Kesesuaian fisik ter verifikasi temuan Barang Unmact dan Mact to S000</td>
                                     <td class="p-3 text-center"><span class="bg-[#1C2541] text-white text-[9px] font-black uppercase px-2 py-1 rounded-sm animate-pulse">Berjalan</span></td>
@@ -1667,9 +1820,9 @@
                                     <td class="p-3 font-extrabold text-[#1D2B36] border-r">Fase 5: PICA Final Difference</td>
                                     <td class="p-3 font-bold border-r">Analisis Akar Masalah</td>
                                     <td class="p-3 border-r">Penelusuran penyebab sisa selisih (Rp 14,2 M - Nilai Ter-swap)</td>
-                                    <td class="p-3 text-center font-bold border-r">2 Hari</td>
-                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">15 Sep 2026</td>
-                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">19 Sep 2026</td>
+                                    <td class="p-3 text-center font-bold border-r">5 Hari</td>
+                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">25 Sep 2026</td>
+                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">29 Sep 2026</td>
                                     <td class="p-3 font-semibold border-r">Dokumen PICA Final Difference</td>
                                     <td class="p-3 border-r">Akar masalah logis & faktual</td>
                                     <td class="p-3 text-center"><span class="bg-gray-100 text-gray-500 text-[9px] font-black uppercase px-2 py-1 rounded-sm">Pending</span></td>
@@ -1678,9 +1831,9 @@
                                     <td class="p-3 font-extrabold text-[#1D2B36] border-r">Fase 6: Approval & Pengesahan</td>
                                     <td class="p-3 font-bold border-r">Sign-off & Closing</td>
                                     <td class="p-3 border-r">Rapat finalisasi proyek & pengesahan laporan Final Difference / Write-off</td>
-                                    <td class="p-3 text-center font-bold border-r">2 Hari</td>
-                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">20 Sep 2026</td>
-                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">25 Sep 2026</td>
+                                    <td class="p-3 text-center font-bold border-r">6 Hari</td>
+                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">30 Sep 2026</td>
+                                    <td class="p-3 text-center font-mono text-[11px] text-slate-500 border-r">05 Oct 2026</td>
                                     <td class="p-3 font-semibold border-r">Sign-off Project</td>
                                     <td class="p-3 border-r">Persetujuan Dept Head</td>
                                     <td class="p-3 text-center"><span class="bg-gray-100 text-gray-500 text-[9px] font-black uppercase px-2 py-1 rounded-sm">Pending</span></td>
@@ -3489,6 +3642,349 @@
       return (
         <div className="min-h-screen bg-[#F4F5F7] font-sans pb-12">
           
+          {showJustifikasiModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <div className="bg-white rounded-sm shadow-xl max-w-6xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+                    <div className="bg-[#1D2B36] text-white p-4 flex justify-between items-center shrink-0">
+                        <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
+                            <FileText size={16} /> JUSTIFIKASI, ANALISA, DAN ADJUSTMENT TIMELINE PROYEK
+                        </h3>
+                        <button onClick={() => setShowJustifikasiModal(false)} className="hover:text-gray-300 font-bold text-lg leading-none">
+                            &times;
+                        </button>
+                    </div>
+                    <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-[#F8FAFC]">
+                        
+                        {/* HEADER REPORT */}
+                        <div className="bg-white p-6 md:p-8 border-b border-slate-200">
+                            <h2 className="text-xl md:text-2xl font-black text-[#1D2B36] text-center uppercase tracking-tight mb-6">Laporan Justifikasi, Analisa, dan Adjustment Timeline Proyek Reduksi SOH (Update)</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                                <div className="bg-slate-50 p-3 rounded-sm border border-slate-200">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Tanggal Update</span>
+                                    <span className="text-sm font-black text-[#1D2B36]">5 September 2026</span>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-sm border border-slate-200">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Status Saat Ini</span>
+                                    <span className="text-sm font-black text-[#8C231C]">Fase 3 (Material Dimensi Besar)</span>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-sm border border-slate-200">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Perihal</span>
+                                    <span className="text-xs font-bold text-[#1D2B36] leading-tight block">Justifikasi Kendala Material, Roster, dan Adjustment Timeline V2</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 md:p-8 space-y-8 max-w-6xl mx-auto">
+                            
+                            {/* SECTION 1: JUSTIFIKASI */}
+                            <div className="bg-white rounded-sm border border-slate-200 shadow-sm overflow-hidden">
+                                <div className="bg-[#1C2541] p-3 border-b border-[#2A446C]">
+                                    <h3 className="text-xs font-black text-white uppercase tracking-wider">1. Justifikasi Kendala & Kebutuhan (Update)</h3>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="bg-slate-50">
+                                            <tr className="text-slate-600 text-[10px] font-black uppercase tracking-wider">
+                                                <th className="p-3 border-b border-r border-slate-200 w-1/5">Kategori</th>
+                                                <th className="p-3 border-b border-r border-slate-200 w-1/4">Kondisi Saat Ini</th>
+                                                <th className="p-3 border-b border-r border-slate-200 w-1/4">Dampak</th>
+                                                <th className="p-3 border-b border-r border-slate-200">Usulan Tindakan</th>
+                                                <th className="p-3 border-b border-slate-200 text-center w-24">Urgensi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-xs text-slate-700 align-top">
+                                            {justifikasiReportData.kendala.map((item, idx) => (
+                                                <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50/50">
+                                                    <td className="p-3 font-bold border-r border-slate-100">{item.kategori}</td>
+                                                    <td className="p-3 border-r border-slate-100 leading-relaxed">{item.kondisi}</td>
+                                                    <td className="p-3 border-r border-slate-100 leading-relaxed">{item.dampak}</td>
+                                                    <td className="p-3 border-r border-slate-100 leading-relaxed font-semibold">{item.usulan}</td>
+                                                    <td className="p-3 text-center">
+                                                        <span className={`inline-block px-2 py-1 border rounded-sm text-[9px] font-black uppercase ${item.urgensiColor}`}>{item.urgensi}</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* SECTION 2: BEBAN KERJA */}
+                            <div className="bg-white rounded-sm border border-slate-200 shadow-sm overflow-hidden">
+                                <div className="bg-[#1C2541] p-3 border-b border-[#2A446C]">
+                                    <h3 className="text-xs font-black text-white uppercase tracking-wider">2. Report & Analisa Beban Kerja</h3>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="bg-slate-50">
+                                            <tr className="text-slate-600 text-[10px] font-black uppercase tracking-wider">
+                                                <th className="p-3 border-b border-r border-slate-200 w-1/4">Fase / Aktivitas</th>
+                                                <th className="p-3 border-b border-r border-slate-200 text-center">Sisa Item</th>
+                                                <th className="p-3 border-b border-r border-slate-200">Setup Manpower (MP)</th>
+                                                <th className="p-3 border-b border-r border-slate-200">Kapasitas Harian Tim (Faktual)</th>
+                                                <th className="p-3 border-b border-slate-200 text-center">Estimasi Penyelesaian</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-xs text-slate-700">
+                                            {justifikasiReportData.bebanKerja.map((item, idx) => (
+                                                <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50/50">
+                                                    <td className="p-3 font-bold border-r border-slate-100">{item.fase}</td>
+                                                    <td className="p-3 border-r border-slate-100 text-center font-bold text-[#8C231C]">{item.sisaItem}</td>
+                                                    <td className="p-3 border-r border-slate-100">{item.setupMp}</td>
+                                                    <td className="p-3 border-r border-slate-100 leading-relaxed">{item.kapasitas}</td>
+                                                    <td className="p-3 text-center font-black text-[#1C2541]">{item.estimasi}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* SECTION 3: ROADMAP */}
+                            <div className="bg-white rounded-sm border border-slate-200 shadow-sm overflow-hidden">
+                                <div className="bg-[#1C2541] p-3 border-b border-[#2A446C]">
+                                    <h3 className="text-xs font-black text-white uppercase tracking-wider">3. Adjustment Timeline (Roadmap Close Project)</h3>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="bg-slate-50">
+                                            <tr className="text-slate-600 text-[10px] font-black uppercase tracking-wider">
+                                                <th className="p-3 border-b border-r border-slate-200 w-24 text-center">Fase</th>
+                                                <th className="p-3 border-b border-r border-slate-200 w-1/3">Aktivitas Utama</th>
+                                                <th className="p-3 border-b border-r border-slate-200 w-32 text-center">Estimasi Durasi</th>
+                                                <th className="p-3 border-b border-slate-200">Keterangan / Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-xs text-slate-700">
+                                            {justifikasiReportData.roadmap.map((item, idx) => (
+                                                <tr key={idx} className={`border-b border-slate-100 hover:bg-slate-50/50 ${item.isTotal ? 'bg-slate-100 text-[#1C2541] font-black uppercase text-[10px]' : ''}`}>
+                                                    <td className="p-3 border-r border-slate-100 text-center font-bold">{item.fase}</td>
+                                                    <td className="p-3 border-r border-slate-100 font-semibold">{item.aktivitas}</td>
+                                                    <td className={`p-3 text-center border-r border-slate-100 ${item.isTotal ? 'text-[#8C231C]' : 'font-bold'}`}>{item.durasi}</td>
+                                                    <td className={`p-3 leading-relaxed ${item.isTotal ? 'text-[9px]' : ''}`}>{item.status}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* SECTION 4: PLAN MP FASE 3 */}
+                            <div className="bg-white rounded-sm border border-slate-200 shadow-sm overflow-hidden">
+                                <div className="bg-[#2A446C] p-3 border-b border-[#1C2541]">
+                                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Plan MP Harian 4 (Progres Fase 3)</h3>
+                                </div>
+                                <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6 bg-slate-50/50">
+                                    
+                                    <div className="space-y-4">
+                                        <div className="border border-slate-200 rounded-sm bg-white overflow-hidden shadow-sm">
+                                            <div className="bg-slate-100 p-2 border-b border-slate-200"><h4 className="text-[10px] font-black uppercase tracking-wider text-slate-600">Variabel Operasional</h4></div>
+                                            <table className="w-full text-left text-[11px] text-slate-700">
+                                                <tbody>
+                                                    {justifikasiReportData.planMpFase3.variabel.map((item, idx) => (
+                                                        <tr key={idx} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                                                            <td className="p-2 border-r border-slate-50 w-3/5 font-semibold">{item.nama}</td>
+                                                            <td className="p-2 border-r border-slate-50 text-center font-bold w-12">{item.nilai}</td>
+                                                            <td className="p-2 text-slate-500">{item.satuan}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div className="border border-slate-200 rounded-sm bg-white overflow-hidden shadow-sm">
+                                            <div className="bg-slate-100 p-2 border-b border-slate-200"><h4 className="text-[10px] font-black uppercase tracking-wider text-slate-600">Simulasi Kalkulasi Kapasitas</h4></div>
+                                            <table className="w-full text-left text-[11px] text-slate-700">
+                                                <thead className="bg-slate-50">
+                                                    <tr className="text-[9px] uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                                                        <th className="p-2 border-r border-slate-50">Komponen</th>
+                                                        <th className="p-2 border-r border-slate-50">Rumus</th>
+                                                        <th className="p-2">Hasil</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {justifikasiReportData.planMpFase3.simulasi.map((item, idx) => (
+                                                        <tr key={idx} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                                                            <td className="p-2 border-r border-slate-50 font-medium">{item.komponen}</td>
+                                                            <td className="p-2 border-r border-slate-50 text-slate-500 font-mono text-[9px]">{item.rumus}</td>
+                                                            <td className="p-2 font-bold text-[#1C2541]">{item.hasil}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div className="border border-slate-200 rounded-sm bg-white overflow-hidden shadow-sm">
+                                            <div className="bg-slate-100 p-2 border-b border-slate-200"><h4 className="text-[10px] font-black uppercase tracking-wider text-slate-600">Distribusi Formasi Harian Mingguan</h4></div>
+                                            <table className="w-full text-left text-[11px] text-slate-700">
+                                                <thead className="bg-slate-50">
+                                                    <tr className="text-[9px] uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                                                        <th className="p-2 border-r border-slate-50">Formasi Harian</th>
+                                                        <th className="p-2 border-r border-slate-50 text-center">Jumlah Hari</th>
+                                                        <th className="p-2">Total Man-days</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {justifikasiReportData.planMpFase3.formasi.map((item, idx) => (
+                                                        <tr key={idx} className={`border-b border-slate-50 last:border-0 ${item.isTotal ? 'bg-slate-100 font-bold text-[#1C2541]' : 'hover:bg-slate-50'}`}>
+                                                            <td className="p-2 border-r border-slate-50">{item.nama}</td>
+                                                            <td className="p-2 border-r border-slate-50 text-center">{item.hari}</td>
+                                                            <td className="p-2">{item.total}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="border border-slate-200 rounded-sm bg-white overflow-hidden shadow-sm">
+                                            <div className="bg-slate-100 p-2 border-b border-slate-200"><h4 className="text-[10px] font-black uppercase tracking-wider text-slate-600">Indikator Kinerja Harian</h4></div>
+                                            <table className="w-full text-left text-[11px] text-slate-700">
+                                                <thead className="bg-slate-50">
+                                                    <tr className="text-[9px] uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                                                        <th className="p-2 border-r border-slate-50">Indikator</th>
+                                                        <th className="p-2 border-r border-slate-50">Rumus</th>
+                                                        <th className="p-2 border-r border-slate-50 text-center">Gross (100%)</th>
+                                                        <th className="p-2 text-center text-[#8C231C]">Net (85%)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {justifikasiReportData.planMpFase3.indikator.map((item, idx) => (
+                                                        <tr key={idx} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                                                            <td className="p-2 border-r border-slate-50 font-semibold">{item.nama}</td>
+                                                            <td className="p-2 border-r border-slate-50 text-slate-500 text-[9px]">{item.rumus}</td>
+                                                            <td className="p-2 border-r border-slate-50 text-center">{item.gross}</td>
+                                                            <td className="p-2 text-center font-bold text-[#8C231C] bg-red-50/30">{item.net}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div className="border border-slate-200 rounded-sm bg-white overflow-hidden shadow-sm">
+                                            <div className="bg-[#1C2541] p-2 border-b border-[#0B1329] flex justify-between items-center">
+                                                <h4 className="text-[10px] font-black uppercase tracking-wider text-white">Production Progress Tracking</h4>
+                                                <span className="text-[8px] bg-white text-[#1C2541] px-1.5 py-0.5 rounded font-bold uppercase">15 Hari Aktual</span>
+                                            </div>
+                                            <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                                                <table className="w-full text-left text-[10px] text-slate-700">
+                                                    <thead className="bg-slate-100 sticky top-0 shadow-sm">
+                                                        <tr className="text-[9px] uppercase tracking-wider text-slate-600 border-b border-slate-200">
+                                                            <th className="p-2 border-r border-slate-200 text-center">Hari Ke</th>
+                                                            <th className="p-2 border-r border-slate-200">Hari</th>
+                                                            <th className="p-2 border-r border-slate-200 text-center">MP Aktif</th>
+                                                            <th className="p-2 border-r border-slate-200 text-center">Kapasitas</th>
+                                                            <th className="p-2 text-center">Progres Kumulatif</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {justifikasiReportData.planMpFase3.tracking.map((item, idx) => (
+                                                            <tr key={idx} className="border-b border-slate-50 hover:bg-blue-50/50">
+                                                                <td className="p-1.5 border-r border-slate-100 text-center font-bold text-slate-500">{item.hariKe}</td>
+                                                                <td className={`p-1.5 border-r border-slate-100 font-semibold ${item.hari === 'Minggu' ? 'text-red-600' : ''}`}>{item.hari}</td>
+                                                                <td className={`p-1.5 border-r border-slate-100 text-center font-bold ${item.mp === 2 ? 'text-amber-600 bg-amber-50/50' : 'text-[#2A446C]'}`}>{item.mp}</td>
+                                                                <td className="p-1.5 border-r border-slate-100 text-center font-mono">{item.kapasitas}</td>
+                                                                <td className="p-1.5 text-center font-bold text-[#1C2541] bg-slate-50">{item.kumulatif}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* SECTION 5: PLAN MP FASE 4 */}
+                            <div className="bg-white rounded-sm border border-slate-200 shadow-sm overflow-hidden mb-12">
+                                <div className="bg-[#3A5A61] p-3 border-b border-[#1D2B36]">
+                                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Plan Penambahan MP Progress Fase 4</h3>
+                                </div>
+                                <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6 bg-slate-50/50">
+                                    
+                                    <div className="space-y-4">
+                                        <div className="border border-slate-200 rounded-sm bg-white overflow-hidden shadow-sm">
+                                            <div className="bg-slate-100 p-2 border-b border-slate-200"><h4 className="text-[10px] font-black uppercase tracking-wider text-slate-600">Variabel Operasional & Kebutuhan</h4></div>
+                                            <table className="w-full text-left text-[11px] text-slate-700">
+                                                <tbody>
+                                                    {justifikasiReportData.planMpFase4.variabel.map((item, idx) => (
+                                                        <tr key={idx} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                                                            <td className="p-2 border-r border-slate-50 w-2/5 font-semibold leading-relaxed">{item.nama}</td>
+                                                            <td className={`p-2 border-r border-slate-50 text-center font-bold w-20 ${item.nilai.includes('Tinggi') ? 'text-red-600' : 'text-[#1D2B36]'}`}>{item.nilai}</td>
+                                                            <td className="p-2 text-slate-500 leading-relaxed text-[10px]">{item.ket}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div className="border border-slate-200 rounded-sm bg-white overflow-hidden shadow-sm">
+                                            <div className="bg-slate-100 p-2 border-b border-slate-200"><h4 className="text-[10px] font-black uppercase tracking-wider text-slate-600">Simulasi Kalkulasi Kapasitas (In Box)</h4></div>
+                                            <table className="w-full text-left text-[11px] text-slate-700">
+                                                <thead className="bg-slate-50">
+                                                    <tr className="text-[9px] uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                                                        <th className="p-2 border-r border-slate-50">Indikator</th>
+                                                        <th className="p-2 border-r border-slate-50">Rumus Perhitungan</th>
+                                                        <th className="p-2 text-center">Hasil</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {justifikasiReportData.planMpFase4.simulasi.map((item, idx) => (
+                                                        <tr key={idx} className={`border-b border-slate-50 last:border-0 hover:bg-slate-50 ${item.nama.includes('Aktual') ? 'bg-amber-50/30' : ''}`}>
+                                                            <td className="p-2 border-r border-slate-50 font-medium">{item.nama}</td>
+                                                            <td className="p-2 border-r border-slate-50 text-slate-500 font-mono text-[9px]">{item.rumus}</td>
+                                                            <td className={`p-2 text-center font-bold ${item.nama.includes('Aktual') ? 'text-amber-700 text-xs' : 'text-[#1C2541]'}`}>{item.hasil}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="border border-slate-200 rounded-sm bg-white overflow-hidden shadow-sm h-full flex flex-col">
+                                            <div className="bg-[#1C2541] p-2 border-b border-[#0B1329] flex justify-between items-center shrink-0">
+                                                <h4 className="text-[10px] font-black uppercase tracking-wider text-white">Simulasi Harian Progress</h4>
+                                                <span className="text-[8px] bg-white text-[#1C2541] px-1.5 py-0.5 rounded font-bold uppercase">21 Hari Aktual</span>
+                                            </div>
+                                            <div className="flex-1 overflow-y-auto custom-scrollbar min-h-[300px]">
+                                                <table className="w-full text-left text-[10px] text-slate-700 relative">
+                                                    <thead className="bg-slate-100 sticky top-0 z-10 shadow-sm">
+                                                        <tr className="text-[9px] uppercase tracking-wider text-slate-600 border-b border-slate-200">
+                                                            <th className="p-2 border-r border-slate-200 text-center w-10">Hari</th>
+                                                            <th className="p-2 border-r border-slate-200">Formasi Lapangan</th>
+                                                            <th className="p-2 border-r border-slate-200">Status Libur</th>
+                                                            <th className="p-2 border-r border-slate-200 text-center w-16">Kapasitas</th>
+                                                            <th className="p-2 text-center w-16">Kumulatif</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {justifikasiReportData.planMpFase4.tracking.map((item, idx) => {
+                                                            const isLiburAdmin = item.libur.includes('Admin Libur');
+                                                            const isLiburMp = item.libur.includes('MP Fisik');
+                                                            
+                                                            return (
+                                                            <tr key={idx} className={`border-b border-slate-50 transition-colors ${isLiburAdmin ? 'bg-red-50/50' : isLiburMp ? 'bg-amber-50/30' : 'hover:bg-slate-50'}`}>
+                                                                <td className="p-1.5 border-r border-slate-100 text-center font-bold text-slate-500">{item.hariKe}</td>
+                                                                <td className={`p-1.5 border-r border-slate-100 font-semibold ${isLiburAdmin ? 'text-red-700' : ''}`}>{item.formasi}</td>
+                                                                <td className={`p-1.5 border-r border-slate-100 text-[9px] ${isLiburAdmin ? 'text-red-600 font-bold' : isLiburMp ? 'text-amber-600' : 'text-emerald-600'}`}>{item.libur}</td>
+                                                                <td className={`p-1.5 border-r border-slate-100 text-center font-mono font-bold ${isLiburAdmin ? 'text-red-500' : ''}`}>{item.kapasitas}</td>
+                                                                <td className="p-1.5 text-center font-bold text-[#1C2541] bg-slate-50/50">{item.kumulatif}</td>
+                                                            </tr>
+                                                            )
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+          )}
+
           {showAlarmModal && (() => {
               let alarmTotalItem = 0;
               let alarmTotalValue = 0;
@@ -3501,7 +3997,6 @@
                   if (finalAlokasiIdx === -1) finalAlokasiIdx = alarmHeaders.findIndex(h => h && h.toLowerCase().includes('alokasi') && h.toLowerCase().includes('cut off'));
                   if (finalAlokasiIdx === -1) finalAlokasiIdx = alarmHeaders.findIndex(h => h && h.toLowerCase().includes('alokasi'));
 
-                  // Secara eksak mencari header Value Unrestricted agar tidak membaca Total Value lain
                   let finalValueIdx = getColIdx('Value Unrestricted');
                   if (finalValueIdx === -1) finalValueIdx = alarmHeaders.findIndex(h => h && h.toLowerCase().includes('value unrestricted'));
 
@@ -3513,7 +4008,6 @@
                           const alokasiValRaw = row[finalAlokasiIdx].toString().trim();
                           const cleanAlokasi = alokasiValRaw.toLowerCase().replace(/\s/g, '');
                           
-                          // Kondisi mutlak: Hanya mengambil kategori "Waiting QC/Final Diskrepansi" secara eksak
                           if (cleanAlokasi === 'waitingqc/finaldiskrepansi' || cleanAlokasi === 'waitingqc/finaldiscrepansi') {
                               alarmTotalItem++;
 
@@ -3711,13 +4205,23 @@
                         <TrendingDown className="text-[#8C231C]" size={18} />
                         Achievement Progress: Plan vs Actual (Item)
                       </h2>
-                      <button 
-                         onClick={() => setShowAlarmModal(true)}
-                         className="text-amber-500 hover:text-amber-600 transition-colors animate-pulse"
-                         title="Lihat Informasi Data (Alert)"
-                      >
-                         <Bell size={20} />
-                      </button>
+                      <div className="flex items-center gap-3">
+                          <button 
+                             onClick={() => setShowJustifikasiModal(true)}
+                             className="bg-slate-100 hover:bg-slate-200 text-[#1D2B36] px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5 border border-slate-200"
+                             title="Justifikasi, Analisa, dan Adjustment Timeline Proyek"
+                          >
+                             <FileText size={14} />
+                             <span className="hidden sm:inline">Justifikasi & Analisa</span>
+                          </button>
+                          <button 
+                             onClick={() => setShowAlarmModal(true)}
+                             className="text-amber-500 hover:text-amber-600 transition-colors animate-pulse"
+                             title="Lihat Informasi Data (Alert)"
+                          >
+                             <Bell size={20} />
+                          </button>
+                      </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div className="bg-[#FAFAFA] p-3 rounded-sm border border-gray-200 border-l-4 border-l-[#8C231C] shadow-sm flex flex-col justify-center">
@@ -3766,6 +4270,17 @@
                       <h3 className="text-lg sm:text-xl font-black text-[#1D2B36] break-words">
                          {isLoading ? <span className="animate-pulse">...</span> : `${qcValuePercentage}%`}
                       </h3>
+                      <div className="mt-2 pt-2 border-t border-gray-200 space-y-1.5">
+                         <p className="text-[8px] text-slate-500 leading-tight font-bold">
+                            *Justifikasi Ketercapaian Rendah:
+                         </p>
+                         <p className="text-[8px] text-slate-500 leading-tight font-medium">
+                            1. Ketidak sesuaian list non SOH secara QTY serta list material yang tidak sesuai yang ditemukan pada saat QC mempengaruhi ketercapaian Value.
+                         </p>
+                         <p className="text-[8px] text-slate-500 leading-tight font-medium">
+                            2. Masih ada "Rp 6.849.322.579" dari 646 item yang belum ter-QC sehingga ketercapaian value masih jauh dari plan 30 M.
+                         </p>
+                      </div>
                     </div>
                   </div>
 
@@ -3801,19 +4316,39 @@
                           );
                         })}
 
-                        <path d={getProgressSvgPath('plan', 7000)} fill="none" stroke="#9CA3AF" strokeWidth="3" strokeDasharray="5,4" />
+                        {/* Penanda Garis Vertikal Adjustment */}
+                        {sep1Index > 0 && (
+                            <g>
+                               <line x1={sep1X} y1="40" x2={sep1X} y2="400" stroke="#F59E0B" strokeWidth="2" strokeDasharray="4,4" />
+                               <rect x={sep1X + 4} y="45" width="85" height="26" fill="#FFFBEB" stroke="#F59E0B" strokeWidth="1" rx="2" />
+                               <text x={sep1X + 8} y="56" fontSize="8" fontWeight="bold" fill="#D97706" textAnchor="start">
+                                 Adjustment Time
+                               </text>
+                               <text x={sep1X + 8} y="66" fontSize="8" fontWeight="bold" fill="#D97706" textAnchor="start">
+                                 (Mulai 01 Sep)
+                               </text>
+                            </g>
+                        )}
+
+                        {/* Garis Plan (Item) */}
+                        <path d={getProgressSvgPath('plan', 7000, 0, sep1Index > 0 ? sep1Index : progressData.length - 1)} fill="none" stroke="#9CA3AF" strokeWidth="3" strokeDasharray="5,4" />
+                        {sep1Index > 0 && (
+                            <path d={getProgressSvgPath('plan', 7000, sep1Index, progressData.length - 1)} fill="none" stroke="#F59E0B" strokeWidth="3" strokeDasharray="5,4" />
+                        )}
 
                         {progressData.map((d, i) => {
                           if (d.plan === null) return null;
                           const xPos = 50 + i * (710 / (progressData.length - 1));
                           const yPos = 400 - (d.plan / 7000) * 360;
+                          const isAdjusted = sep1Index > 0 && i >= sep1Index;
                           return (
-                            <circle key={`dot-plan-${i}`} cx={xPos} cy={yPos} r="5" fill="#9CA3AF" className="cursor-pointer transition-all hover:r-[7px]">
-                              <title>Tanggal: {d.date}&#10;Target (Item): {d.plan} Item</title>
+                            <circle key={`dot-plan-${i}`} cx={xPos} cy={yPos} r="5" fill={isAdjusted ? "#F59E0B" : "#9CA3AF"} className="cursor-pointer transition-all hover:r-[7px]">
+                              <title>Tanggal: {d.date}&#10;Target (Item): {d.plan} Item {isAdjusted ? '(Adjustment)' : ''}</title>
                             </circle>
                           );
                         })}
 
+                        {/* Garis Actual (Item) */}
                         <path d={getProgressSvgPath('actual', 7000)} fill="none" stroke="#8C231C" strokeWidth="4.5" />
 
                         {progressData.map((d, i) => {
@@ -3827,19 +4362,25 @@
                           );
                         })}
 
-                        <path d={getProgressSvgPath('planValue', 32000000000)} fill="none" stroke="#3A5A61" strokeWidth="3" strokeDasharray="5,4" opacity="0.4" />
+                        {/* Garis Plan (Value) */}
+                        <path d={getProgressSvgPath('planValue', 32000000000, 0, sep1Index > 0 ? sep1Index : progressData.length - 1)} fill="none" stroke="#3A5A61" strokeWidth="3" strokeDasharray="5,4" opacity="0.4" />
+                        {sep1Index > 0 && (
+                            <path d={getProgressSvgPath('planValue', 32000000000, sep1Index, progressData.length - 1)} fill="none" stroke="#F59E0B" strokeWidth="3" strokeDasharray="5,4" opacity="0.4" />
+                        )}
 
                         {progressData.map((d, i) => {
                           if (d.planValue === null) return null;
                           const xPos = 50 + i * (710 / (progressData.length - 1));
                           const yPos = 400 - (d.planValue / 32000000000) * 360;
+                          const isAdjusted = sep1Index > 0 && i >= sep1Index;
                           return (
-                            <circle key={`dot-plan-val-${i}`} cx={xPos} cy={yPos} r="5" fill="#3A5A61" opacity="0.5" className="cursor-pointer transition-all hover:r-[7px]">
-                              <title>Tanggal: {d.date}&#10;Target (Value): {formatRupiah(d.planValue)}</title>
+                            <circle key={`dot-plan-val-${i}`} cx={xPos} cy={yPos} r="5" fill={isAdjusted ? "#F59E0B" : "#3A5A61"} opacity={isAdjusted ? "0.8" : "0.5"} className="cursor-pointer transition-all hover:r-[7px]">
+                              <title>Tanggal: {d.date}&#10;Target (Value): {formatRupiah(d.planValue)} {isAdjusted ? '(Adjustment)' : ''}</title>
                             </circle>
                           );
                         })}
 
+                        {/* Garis Actual (Value) */}
                         <path d={getProgressSvgPath('actualValue', 32000000000)} fill="none" stroke="#3A5A61" strokeWidth="4.5" />
 
                         {progressData.map((d, i) => {
@@ -3857,6 +4398,7 @@
 
                   <div className="flex flex-wrap justify-center text-[10px] text-slate-500 font-bold uppercase mt-4 mb-2 gap-x-6 gap-y-3">
                     <span className="flex items-center gap-2"><div className="w-4 border-t-[3px] border-dashed border-gray-400"></div> Target (Item)</span>
+                    <span className="flex items-center gap-2"><div className="w-4 border-t-[3px] border-dashed border-amber-500"></div> Target Adjustment</span>
                     <span className="flex items-center gap-2"><div className="w-3 h-3 bg-[#8C231C] rounded-sm"></div> Aktual (Item)</span>
                     <span className="flex items-center gap-2"><div className="w-4 border-t-[3px] border-dashed border-[#3A5A61] opacity-40"></div> Target (Value)</span>
                     <span className="flex items-center gap-2"><div className="w-3 h-3 bg-[#3A5A61] rounded-sm"></div> Aktual (Value)</span>
@@ -3872,13 +4414,31 @@
                      <div className="flex items-start gap-2">
                         <Database size={14} className="text-[#3A5A61] shrink-0 mt-0.5" />
                         <p className="text-[10px] text-slate-700 leading-relaxed font-medium flex-1">
-                           <span className="font-bold">Sumber Data Actual:</span> <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1584029697#gid=1584029697" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all inline-flex items-center gap-1 hover:text-blue-800 transition-colors">"https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1584029697#gid=1584029697" <ExternalLink size={10} /></a>
+                           <span className="font-bold">Sumber Data Actual (Unique QC):</span> <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1584029697#gid=1584029697" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all inline-flex items-center gap-1 hover:text-blue-800 transition-colors">"https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=1584029697#gid=1584029697" <ExternalLink size={10} /></a>
                         </p>
                      </div>
                      <div className="flex items-start gap-2">
                         <Database size={14} className="text-[#3A5A61] shrink-0 mt-0.5" />
                         <p className="text-[10px] text-slate-700 leading-relaxed font-medium flex-1">
-                           <span className="font-bold">Sumber Data Actual 2 (Resume Khusus Tahap 2 - {actualQcCount} Item Ter-QC beserta Value {formatRupiah(actualQcValue)}):</span> <a href={resumeCsvUrl || '#'} download="Resume_QC_Tahap2.xls" className="text-blue-600 hover:underline break-all inline-flex items-center gap-1 hover:text-blue-800 transition-colors">Unduh Format File Excel (Resume Aktual Tahap 2) <ExternalLink size={10} /></a>
+                           <span className="font-bold">Sumber Data Duplikat:</span> <a href="https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/edit?gid=2001975386#gid=2001975386" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all inline-flex items-center gap-1 hover:text-blue-800 transition-colors">"https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/edit?gid=2001975386#gid=2001975386" <ExternalLink size={10} /></a>
+                        </p>
+                     </div>
+                     <div className="flex items-start gap-2">
+                        <Database size={14} className="text-[#3A5A61] shrink-0 mt-0.5" />
+                        <p className="text-[10px] text-slate-700 leading-relaxed font-medium flex-1">
+                           <span className="font-bold">Sumber Data Tereliminasi:</span> <a href="https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/edit?gid=1605736205#gid=1605736205" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all inline-flex items-center gap-1 hover:text-blue-800 transition-colors">"https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/edit?gid=1605736205#gid=1605736205" <ExternalLink size={10} /></a>
+                        </p>
+                     </div>
+                     <div className="flex items-start gap-2">
+                        <Database size={14} className="text-[#3A5A61] shrink-0 mt-0.5" />
+                        <p className="text-[10px] text-slate-700 leading-relaxed font-medium flex-1">
+                           <span className="font-bold">Sumber Data Comex Palaran:</span> <a href="https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/edit?gid=1306278441#gid=1306278441" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all inline-flex items-center gap-1 hover:text-blue-800 transition-colors">"https://docs.google.com/spreadsheets/d/1Pv07kyrrklIelvGOB6fseCseXu_ds3-R/edit?gid=1306278441#gid=1306278441" <ExternalLink size={10} /></a>
+                        </p>
+                     </div>
+                     <div className="flex items-start gap-2 border-t border-slate-300 pt-2">
+                        <FileText size={14} className="text-[#8C231C] shrink-0 mt-0.5" />
+                        <p className="text-[10px] text-slate-700 leading-relaxed font-medium flex-1">
+                           <span className="font-bold text-[#8C231C]">Resume Excel (Khusus Tahap 2):</span> <a href={resumeCsvUrl || '#'} download="Resume_QC_Tahap2.xls" className="text-[#8C231C] hover:underline break-all inline-flex items-center gap-1 hover:text-[#781F1A] transition-colors">Unduh Format File Excel ({actualQcCount} Item Unique Ter-QC beserta Value {formatRupiah(actualQcValue)}) <ExternalLink size={10} /></a>
                         </p>
                      </div>
                   </div>

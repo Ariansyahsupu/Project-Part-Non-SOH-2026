@@ -92,6 +92,8 @@
       const [showJustifikasiModal, setShowJustifikasiModal] = useState(false);
       const [justifikasiData, setJustifikasiData] = useState({ headers: [], rows: [] });
       const [isLoadingJustifikasi, setIsLoadingJustifikasi] = useState(false);
+      const [siteClosingS000Item, setSiteClosingS000Item] = useState(6822);
+      const [siteClosingS000Value, setSiteClosingS000Value] = useState(983638949);
 
       // Data Justifikasi Hardcoded Sesuai Instruksi
       const justifikasiReportData = {
@@ -1086,6 +1088,90 @@
               fetchJustifikasi();
           }
       }, [showJustifikasiModal, justifikasiData.rows.length]);
+
+      useEffect(() => {
+        let intervalId;
+        const fetchSiteClosing = async () => {
+            try {
+                const csvUrl = 'https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/export?format=csv&gid=1546986844';
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error("Gagal load CSV Site Closing");
+                const csvText = await response.text();
+                
+                const parseCsvRow = (text) => {
+                    const result = [];
+                    let cell = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            result.push(cell);
+                            cell = '';
+                        } else {
+                            cell += char;
+                        }
+                    }
+                    result.push(cell);
+                    return result;
+                };
+
+                const rawLines = csvText.split(/\r?\n/);
+                if (rawLines.length > 0) {
+                    const headers = parseCsvRow(rawLines[0]).map(h => h.trim().toLowerCase());
+                    // 1. CARI "VALUE" SECARA SPESIFIK & MUTLAK SEBAGAI PRIORITAS UTAMA
+                    let valueIndex = headers.findIndex(h => h === 'value');
+                    
+                    if (valueIndex !== -1) {
+                        let count = 0;
+                        let totalVal = 0;
+                        for(let i = 1; i < rawLines.length; i++) {
+                            if (!rawLines[i].trim()) continue;
+                            const row = parseCsvRow(rawLines[i]);
+                            
+                            if (row.join('').replace(/,/g,'').trim() !== '') {
+                                count++;
+                                if (row[valueIndex]) {
+                                    let valStr = row[valueIndex].toString();
+                                    
+                                    // Pembersihan angka yang lebih ketat untuk nominal Indonesia/Internasional
+                                    let clean = valStr.replace(/Rp/gi, '').replace(/"/g, '').replace(/\s/g, '');
+                                    clean = clean.replace(/[,.]00$/, ''); // Buang .00 atau ,00 di belakang
+                                    
+                                    if (clean.includes(',')) {
+                                        const parts = clean.split(',');
+                                        // Jika koma digunakan sebagai desimal (2 digit), ambil bagian depannya saja
+                                        if (parts[parts.length - 1].length <= 2) {
+                                            clean = parts[0];
+                                        } else {
+                                            // Jika koma sebagai pemisah ribuan
+                                            clean = clean.replace(/,/g, '');
+                                        }
+                                    }
+                                    
+                                    // Hanya ambil angka
+                                    clean = clean.replace(/\D/g, '');
+                                    
+                                    const val = parseInt(clean, 10);
+                                    if (!isNaN(val) && val > 0) {
+                                        totalVal += val;
+                                    }
+                                }
+                            }
+                        }
+                        if (count > 0) setSiteClosingS000Item(count);
+                        if (totalVal > 0) setSiteClosingS000Value(totalVal);
+                    }
+                }
+            } catch (err) {
+                console.warn("Gagal mengambil data Site Closing S000:", err);
+            }
+        };
+        fetchSiteClosing();
+        intervalId = setInterval(fetchSiteClosing, 60000);
+        return () => clearInterval(intervalId);
+      }, []);
 
       useEffect(() => {
           if (view === 'gsto' && isAuthenticatedGsto) {
@@ -3227,8 +3313,8 @@
                                     )}
                                 </div>
                                 <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-6">
-                                    <div>+ PART NON SOH BY ITEM (TERDETEKSI S000 SITE CLOSING): 6.822</div>
-                                    <div className="mt-1">+ PART NON SOH BY VALUE (TERDETEKSI S000 SITE CLOSING): Rp 983.638.949</div>
+                                    <div>+ PART NON SOH BY ITEM (TERDETEKSI S000 SITE CLOSING): {siteClosingS000Item.toLocaleString('id-ID')}</div>
+                                    <div className="mt-1">+ PART NON SOH BY VALUE (TERDETEKSI S000 SITE CLOSING): {formatRupiah(siteClosingS000Value)}</div>
                                 </div>
                             </div>
                             <div className="mt-auto w-full">
@@ -3349,109 +3435,67 @@
                 <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm mt-6">
                     <div className="flex justify-between items-end border-b border-gray-100 pb-3 mb-4">
                         <h2 className="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2">
-                            <Database className="text-[#2A446C]" size={18} />
-                            VALUE UNRESTRICTED S000 TERUPDATE
+                            <Activity className="text-[#2A446C]" size={18} />
+                            PLAN SWAP MATERIAL S000 SITE DAN TF S000 SITE EXISTING
                         </h2>
-                        <a href="https://docs.google.com/spreadsheets/d/1cKH5_GvaXszc1hMYfvVd71l6pcvr_sP3z7pCuGCSFww/edit?gid=770971417#gid=770971417" target="_blank" rel="noreferrer" className="text-[#2A446C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
+                        <a href="https://docs.google.com/spreadsheets/d/1HTHK-4OxM4-4lTYk_LA-rx4UUlZfgjpWk2HTwnt8wgU/edit?gid=2103025476#gid=2103025476" target="_blank" rel="noreferrer" className="text-[#2A446C] hover:underline font-bold text-[10px] inline-flex items-center gap-1">
                             Sumber Data <ExternalLink size={10} />
                         </a>
                     </div>
                     
-                    <div className="flex flex-col gap-4">
-                        <div className="bg-[#F0F4F8] border border-[#E2E8F0] rounded-sm p-4 shadow-inner flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <div>
-                                <span className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">Total Keseluruhan Value</span>
-                                <span className="text-xl font-black text-[#1D2B36] block">{formatRupiah(finalUnrestrictedTotal)}</span>
-                            </div>
-                            <button 
-                                onClick={() => setShowUnrestrictedBreakdown(!showUnrestrictedBreakdown)}
-                                className="bg-[#2A446C] hover:bg-[#1C2541] text-white px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm"
-                            >
-                                {showUnrestrictedBreakdown ? 'Hide Breakdown' : 'View Breakdown'}
-                            </button>
-                        </div>
-                        
-                        {showUnrestrictedBreakdown && (
-                            <div className="overflow-x-auto border-t border-slate-100 pt-2">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="bg-[#2A446C] text-white text-[10px] font-black uppercase tracking-wider">
-                                            <th className="p-3 w-1/2">SITE / PLANT</th>
-                                            <th className="p-3 w-1/2 text-right">VALUE</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="text-xs text-slate-700">
-                                        {Object.keys(finalValueBreakdown).length > 0 ? (
-                                            Object.entries(finalValueBreakdown).sort((a,b) => b[1] - a[1]).map(([site, val], idx) => (
-                                                <tr key={idx} className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
-                                                    <td className="p-3 font-bold border-r border-slate-100">{site}</td>
-                                                    <td className="p-3 text-right font-mono">{formatRupiah(val)}</td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="2" className="p-4 text-center text-slate-500 font-bold text-xs bg-slate-50">Menarik rincian breakdown data site...</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-[#2A446C] text-white text-[10px] font-black uppercase tracking-wider">
+                                    <th className="p-3 w-1/4">KATEGORI</th>
+                                    <th className="p-3 w-1/4 text-center">TOTAL ITEM</th>
+                                    <th className="p-3 w-1/4 text-right">VALUE</th>
+                                    <th className="p-3 w-1/4 pl-6">REMARKS</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-xs text-slate-700">
+                                <tr className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                                    <td className="p-3 font-bold border-r border-slate-100">ALL SITE CLOSING</td>
+                                    <td className="p-3 text-center border-r border-slate-100">6.822</td>
+                                    <td className="p-3 text-right font-mono border-r border-slate-100">Rp 843.562.580</td>
+                                    <td className="p-3 text-[#2A446C] font-bold border-r border-slate-100 pl-6">Verivikasi Validasi BA</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                {}
+                <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm mt-6">
+                    <h2 className="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2 border-b border-gray-100 pb-3 mb-6">
+                        <Activity className="text-[#2A446C]" size={18} />
+                        REKONSILIASI SELISIH (GAP) VALUE
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
+                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-sm flex flex-col justify-center shadow-sm">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase mb-1">Total Value Target</span>
+                            <h3 className="text-lg font-black text-[#1D2B36]">{formatRupiah(displayFinalValue)}</h3>
+                        </div>
+                        <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-sm flex flex-col justify-center shadow-sm">
+                            <span className="text-[10px] font-bold text-emerald-700 uppercase mb-1">Total BA (Tervalidasi)</span>
+                            <h3 className="text-lg font-black text-emerald-700">{formatRupiah(valueBA)}</h3>
+                            <span className="text-[9px] font-bold text-emerald-600 mt-1">{pctBA.toFixed(1)}% dari Target</span>
+                        </div>
+                        <div className="bg-[#F0F4F8] border border-[#2A446C]/20 p-4 rounded-sm flex flex-col justify-center shadow-sm">
+                            <span className="text-[10px] font-bold text-[#2A446C] uppercase mb-1">Total S000 (Unrestricted)</span>
+                            <h3 className="text-lg font-black text-[#2A446C]">{formatRupiah(finalUnrestrictedTotal)}</h3>
+                            <span className="text-[9px] font-bold text-[#2A446C] mt-1">{pctS000.toFixed(1)}% dari Target</span>
+                        </div>
+                        <div className="bg-[#F9EAE9] border border-[#8C231C]/20 p-4 rounded-sm flex flex-col justify-center shadow-sm">
+                            <span className="text-[10px] font-bold text-[#8C231C] uppercase mb-1">Selisih (Gap)</span>
+                            <h3 className="text-lg font-black text-[#8C231C]">{formatRupiah(selisihValue)}</h3>
+                            <span className="text-[9px] font-bold text-[#8C231C] mt-1">{pctSelisih.toFixed(1)}% dari Target</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm mt-6">
                     <div className="flex justify-between items-end border-b border-gray-100 pb-3 mb-4">
-                        <h2 className="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2">
-                            <Activity className="text-[#2A446C]" size={18} />
-                            REKONSILIASI SELISIH (GAP) VALUE
-                        </h2>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-[#F0F4F8] p-4 rounded-sm border border-[#E2E8F0] shadow-sm flex flex-col justify-center">
-                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">Total Value Di-Reduce</p>
-                            <h3 className="text-base lg:text-lg font-black text-[#1D2B36]">{formatRupiah(displayFinalValue)}</h3>
-                        </div>
-                        <div className="bg-[#F0F4F8] p-4 rounded-sm border border-[#E2E8F0] shadow-sm flex flex-col justify-center">
-                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">- Total Value BA</p>
-                            <h3 className="text-base lg:text-lg font-black text-[#2A446C]">{formatRupiah(valueBA)}</h3>
-                        </div>
-                        <div className="bg-[#F0F4F8] p-4 rounded-sm border border-[#E2E8F0] shadow-sm flex flex-col justify-center">
-                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">- S000 Terupdate</p>
-                            <h3 className="text-base lg:text-lg font-black text-[#3A5A61]">{formatRupiah(finalUnrestrictedTotal)}</h3>
-                        </div>
-                        <div className={`p-4 rounded-sm border shadow-sm flex flex-col justify-center ${selisihValue > 0 ? 'bg-amber-50 border-amber-200' : selisihValue < 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'}`}>
-                            <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${selisihValue > 0 ? 'text-amber-700' : selisihValue < 0 ? 'text-red-700' : 'text-emerald-700'}`}>= Selisih (Gap)</p>
-                            <h3 className={`text-base lg:text-lg font-black ${selisihValue > 0 ? 'text-amber-600' : selisihValue < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{formatRupiah(selisihValue)}</h3>
-                            <p className={`mt-1.5 pt-1.5 border-t text-[8px] font-bold uppercase leading-relaxed ${selisihValue > 0 ? 'text-amber-800 border-amber-200/50' : selisihValue < 0 ? 'text-red-800 border-red-200/50' : 'text-emerald-800 border-emerald-200/50'}`}>
-                                *Justifikasi: Waiting BA Tervalidasi/ BA yang sdh tervalidasi sebelum Cut Off di lakukan Distribution Center.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-2 uppercase">
-                            <span>Komposisi Nilai Ter-Reduce</span>
-                            <span>100% = {formatRupiah(displayFinalValue)}</span>
-                        </div>
-                        <div className="w-full h-8 flex rounded-sm overflow-hidden bg-slate-100 border border-slate-200">
-                            <div className="bg-[#2A446C] h-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden transition-all duration-1000" style={{ width: `${pctBA}%` }} title={`BA: ${formatRupiah(valueBA)}`}>
-                                {pctBA > 5 && `BA (${pctBA.toFixed(1)}%)`}
-                            </div>
-                            <div className="bg-[#3A5A61] h-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden transition-all duration-1000" style={{ width: `${pctS000}%` }} title={`S000: ${formatRupiah(finalUnrestrictedTotal)}`}>
-                                {pctS000 > 5 && `S000 (${pctS000.toFixed(1)}%)`}
-                            </div>
-                            <div className={`${selisihValue > 0 ? 'bg-amber-400' : 'bg-red-500'} h-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden transition-all duration-1000`} style={{ width: `${pctSelisih}%` }} title={`Gap: ${formatRupiah(selisihValue)}`}>
-                                {pctSelisih > 3 && `Gap (${pctSelisih.toFixed(1)}%)`}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm mt-6">
-                    <div className="flex justify-between items-end border-b border-gray-100 pb-3 mb-6">
                         <h2 className="text-sm font-black text-[#1D2B36] uppercase tracking-wider flex items-center gap-2">
                             <Database className="text-[#2A446C]" size={18} />
                             SUMMARY PENYERAPAN ALL SITE STATUS BLOCK

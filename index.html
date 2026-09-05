@@ -92,6 +92,7 @@
       const [showJustifikasiModal, setShowJustifikasiModal] = useState(false);
       const [justifikasiData, setJustifikasiData] = useState({ headers: [], rows: [] });
       const [isLoadingJustifikasi, setIsLoadingJustifikasi] = useState(false);
+      const [showPicaModal, setShowPicaModal] = useState(false);
       const [siteClosingS000Item, setSiteClosingS000Item] = useState(6822);
       const [siteClosingS000Value, setSiteClosingS000Value] = useState(983638949);
 
@@ -196,6 +197,15 @@
               ]
           }
       };
+
+      const picaDataArr = [
+        {
+          tahun: "2026", bulan: "Agustus", week: "Week 4", site: "Project Site", objective: "Pencapaian Project Timeline 100% Akhir Agustus", kategori: "MAN", problem: "Pencapaian fisik timeline hanya mencapai 91% (Deviasi 9%) akibat kurangnya MP operasional harian.", why1: "Total manpower operasional harian berkurang secara tidak terduga pada minggu-minggu akhir penyelesaian project.", why2: "1 orang MP Harian sakit selama seminggu dan 1 orang MP lainnya mengundurkan diri (resign).", why3: "Tidak ada tenaga kerja pengganti (backup) yang dapat langsung mengisi kekosongan 2 posisi MP tersebut.", why4: "Perencanaan jumlah manpower tidak mempertimbangkan buffer (cadangan) untuk mengantisipasi ketidakhadiran (absenteeism) atau turnover di masa krusial.", why5: "Belum adanya standar prosedur tanggap darurat (SOP) untuk penyediaan manpower sementara (casual worker) secara cepat.", identifikasi: "MAN", corrective: "Memberlakukan instruksi overtime (lembur) bagi tim operasional yang ada untuk mengejar ketertinggalan dan segera mencari 1 MP pengganti.", statusCorrective: "OPEN", preventive: "Memasukkan buffer manpower harian (misal: 10% dari total kebutuhan) di fase-fase kritis dan membuat mekanisme cepat rekrutmen harian.", duePreventive: "5-Sep-26", pic: "Project Manager", dept: "Operation / Project", progress: "0%", lampiran: "-", statusPreventive: "OPEN"
+        },
+        {
+          tahun: "2026", bulan: "Agustus", week: "Week 4", site: "Project Site", objective: "Pencapaian Project Timeline 100% Akhir Agustus", kategori: "MAN", problem: "Penyelesaian Administrasi Berita Acara (BA) tertunda/tidak berjalan.", why1: "Tidak ada Staff MP yang fokus untuk mengerjakan dokumen administrasi BA.", why2: "Staff MP yang seharusnya mengerjakan BA dialihkan untuk mem-backup aktivitas Project Closing BYN.", why3: "Terjadi tumpang tindih prioritas dan beban kerja antara penyelesaian project saat ini dengan Project Closing BYN.", why4: "Sistem alokasi resource staf (manpower planning) dari manajemen belum mengatur pemisahan PIC (dedicated staff) saat dua masa kritis/closing proyek terjadi bersamaan.", why5: "Kurangnya 'resource leveling' atau visibilitas beban tugas di awal sebelum memutuskan pemindahan penugasan lintas proyek.", identifikasi: "MAN / METHODE", corrective: "Mengembalikan fokus Staff MP ke BA segera setelah tugas backup selesai, atau meminta BKO (bantuan staf) sementara dari departemen lain.", statusCorrective: "OPEN", preventive: "Membuat mapping alokasi resource yang ketat dan menunjuk 'dedicated PIC' per project yang tidak boleh dialihkan di fase closing.", duePreventive: "5-Sep-26", pic: "Project Manager / HR", dept: "Admin / Project", progress: "0%", lampiran: "-", statusPreventive: "OPEN"
+        }
+      ];
 
       // 6 Dokumentasi final dengan ID yang unik dan menggunakan format Thumbnail API
       const ccpData = [
@@ -3686,6 +3696,89 @@
       return (
         <div className="min-h-screen bg-[#F4F5F7] font-sans pb-12">
           
+          {showPicaModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <div className="bg-white rounded-sm shadow-xl max-w-[95vw] w-full overflow-hidden flex flex-col max-h-[90vh]">
+                    <div className="bg-[#8C231C] text-white p-4 flex justify-between items-center shrink-0">
+                        <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
+                            <AlertTriangle size={16} /> PROBLEM IDENTIFICATION AND CORRECTIVE ACTION (PICA)
+                        </h3>
+                        <button onClick={() => setShowPicaModal(false)} className="hover:text-gray-300 font-bold text-lg leading-none">
+                            &times;
+                        </button>
+                    </div>
+                    <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-[#F8FAFC]">
+                        <div className="bg-white p-4 md:p-6 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <h2 className="text-lg md:text-xl font-black text-[#1D2B36] uppercase tracking-tight">Form PICA Project Timeline</h2>
+                            <a href="https://docs.google.com/spreadsheets/d/1usoXsGu6uKGzJhaFL6hxGgkGMhn-2xC_/edit?gid=1135053703#gid=1135053703" target="_blank" rel="noreferrer" className="bg-[#8C231C] hover:bg-[#781F1A] text-white px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5">
+                                Sumber Data <ExternalLink size={12} />
+                            </a>
+                        </div>
+                        <div className="p-4 md:p-6">
+                            <div className="overflow-x-auto custom-scrollbar border border-slate-200 rounded-sm shadow-sm">
+                                <table className="w-full text-left border-collapse min-w-[2800px]">
+                                    <thead>
+                                        <tr className="bg-[#1D2B36] text-white text-[10px] font-black uppercase tracking-wider text-center">
+                                            <th className="p-3 border-r border-white/20">TAHUN</th>
+                                            <th className="p-3 border-r border-white/20">BULAN</th>
+                                            <th className="p-3 border-r border-white/20">WEEK</th>
+                                            <th className="p-3 border-r border-white/20">SITE</th>
+                                            <th className="p-3 border-r border-white/20">OBJECTIVE - KPI</th>
+                                            <th className="p-3 border-r border-white/20">KATEGORI PROBLEM</th>
+                                            <th className="p-3 border-r border-white/20 min-w-[250px]">PROBLEM</th>
+                                            <th className="p-3 border-r border-white/20 min-w-[250px]">WHY 1</th>
+                                            <th className="p-3 border-r border-white/20 min-w-[250px]">WHY 2</th>
+                                            <th className="p-3 border-r border-white/20 min-w-[250px]">WHY 3</th>
+                                            <th className="p-3 border-r border-white/20 min-w-[250px]">WHY 4</th>
+                                            <th className="p-3 border-r border-white/20 min-w-[250px]">WHY 5</th>
+                                            <th className="p-3 border-r border-white/20">IDENTIFICATION</th>
+                                            <th className="p-3 border-r border-white/20 min-w-[250px]">CORRECTIVE ACTION</th>
+                                            <th className="p-3 border-r border-white/20">STATUS (CA)</th>
+                                            <th className="p-3 border-r border-white/20 min-w-[250px]">PREVENTIVE ACTION</th>
+                                            <th className="p-3 border-r border-white/20">DUE DATE (PA)</th>
+                                            <th className="p-3 border-r border-white/20">PIC (PA)</th>
+                                            <th className="p-3 border-r border-white/20">DEPT IN CHARGE (PA)</th>
+                                            <th className="p-3 border-r border-white/20">PROGRESS (PA)</th>
+                                            <th className="p-3 border-r border-white/20">LAMPIRAN</th>
+                                            <th className="p-3">STATUS (PA)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-xs text-slate-700 align-top bg-white">
+                                        {picaDataArr.map((row, idx) => (
+                                            <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                                <td className="p-3 border-r border-slate-100 text-center font-bold">{row.tahun}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-bold">{row.bulan}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-semibold">{row.week}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-bold">{row.site}</td>
+                                                <td className="p-3 border-r border-slate-100 font-semibold">{row.objective}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-black text-[#8C231C]">{row.kategori}</td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed bg-red-50/30">{row.problem}</td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed text-slate-600">{row.why1}</td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed text-slate-600">{row.why2}</td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed text-slate-600">{row.why3}</td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed text-slate-600">{row.why4}</td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed text-slate-600">{row.why5}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-black text-[#2A446C]">{row.identifikasi}</td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed bg-blue-50/30 font-semibold">{row.corrective}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center"><span className="inline-block px-2 py-1 bg-amber-100 text-amber-800 rounded-sm font-black text-[9px] uppercase">{row.statusCorrective}</span></td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed bg-emerald-50/30 font-semibold">{row.preventive}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-mono text-[11px] font-bold">{row.duePreventive}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-bold text-[#1D2B36]">{row.pic}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-semibold">{row.dept}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-black">{row.progress}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center text-slate-400 font-bold">{row.lampiran}</td>
+                                                <td className="p-3 text-center"><span className="inline-block px-2 py-1 bg-amber-100 text-amber-800 rounded-sm font-black text-[9px] uppercase">{row.statusPreventive}</span></td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          )}
+
           {showJustifikasiModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                 <div className="bg-white rounded-sm shadow-xl max-w-6xl w-full overflow-hidden flex flex-col max-h-[90vh]">
@@ -4250,6 +4343,14 @@
                         Achievement Progress: Plan vs Actual (Item)
                       </h2>
                       <div className="flex items-center gap-3">
+                          <button 
+                             onClick={() => setShowPicaModal(true)}
+                             className="bg-red-50 hover:bg-red-100 text-[#8C231C] px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5 border border-red-200"
+                             title="PICA"
+                          >
+                             <AlertTriangle size={14} />
+                             <span className="hidden sm:inline">PICA</span>
+                          </button>
                           <button 
                              onClick={() => setShowJustifikasiModal(true)}
                              className="bg-slate-100 hover:bg-slate-200 text-[#1D2B36] px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5 border border-slate-200"

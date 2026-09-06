@@ -44,7 +44,9 @@
           AlertTriangle,
           LogIn,
           Bell,
-          FileText
+          FileText,
+          ListChecks,
+          Download
         } from 'lucide-react';
 
     const App = () => {
@@ -93,6 +95,7 @@
       const [justifikasiData, setJustifikasiData] = useState({ headers: [], rows: [] });
       const [isLoadingJustifikasi, setIsLoadingJustifikasi] = useState(false);
       const [showPicaModal, setShowPicaModal] = useState(false);
+      const [showActionPlanModal, setShowActionPlanModal] = useState(false);
       const [siteClosingS000Item, setSiteClosingS000Item] = useState(6822);
       const [siteClosingS000Value, setSiteClosingS000Value] = useState(983638949);
 
@@ -205,6 +208,13 @@
         {
           tahun: "2026", bulan: "Agustus", week: "Week 4", site: "Project Site", objective: "Pencapaian Project Timeline 100% Akhir Agustus", kategori: "MAN", problem: "Penyelesaian Administrasi Berita Acara (BA) tertunda/tidak berjalan.", why1: "Tidak ada Staff MP yang fokus untuk mengerjakan dokumen administrasi BA.", why2: "Staff MP yang seharusnya mengerjakan BA dialihkan untuk mem-backup aktivitas Project Closing BYN.", why3: "Terjadi tumpang tindih prioritas dan beban kerja antara penyelesaian project saat ini dengan Project Closing BYN.", why4: "Sistem alokasi resource staf (manpower planning) dari manajemen belum mengatur pemisahan PIC (dedicated staff) saat dua masa kritis/closing proyek terjadi bersamaan.", why5: "Kurangnya 'resource leveling' atau visibilitas beban tugas di awal sebelum memutuskan pemindahan penugasan lintas proyek.", identifikasi: "MAN / METHODE", corrective: "Mengembalikan fokus Staff MP ke BA segera setelah tugas backup selesai, atau meminta BKO (bantuan staf) sementara dari departemen lain.", statusCorrective: "OPEN", preventive: "Membuat mapping alokasi resource yang ketat dan menunjuk 'dedicated PIC' per project yang tidak boleh dialihkan di fase closing.", duePreventive: "5-Sep-26", pic: "Project Manager / HR", dept: "Admin / Project", progress: "0%", lampiran: "-", statusPreventive: "OPEN"
         }
+      ];
+
+      const actionPlanDataArr = [
+        { langkah: "1. Pemulihan & Penambahan MP Fisik", aktivitas: "Menginstruksikan lembur (overtime) tim eksisting dan merekrut 2 MP Harian (Rincian: 1 MP pengganti resign + 1 MP tambahan/buffer) untuk mendongkrak kapasitas unboxing S000.", kebutuhan: "Persetujuan Penambahan +2 MP Harian.", pic: "Dept Head", deadline: "6 Sep 2026" },
+        { langkah: "2. Pemenuhan Administrasi (BA & Sistem S000)", aktivitas: "Meminta penugasan 1 Staff sebagai Dedicated PIC agar proses pembuatan BA dan update SAP S000 berjalan paralel tanpa interupsi proyek BYN.", kebutuhan: "Penunjukan +1 Staff", pic: "Dept Head", deadline: "6 Sep 2026" },
+        { langkah: "3. Eliminasi Bottleneck Alat (FL Sharing)", aktivitas: "Memutus sistem berbagi alat selama Fase 4 berlangsung agar mobilitas segregasi material besar (429 item) tidak terhenti akibat antrean.", kebutuhan: "Alokasi 1 Unit Forklift Dedicated", pic: "Operation", deadline: "6 Sep 2026" },
+        { langkah: "4. Eksekusi Fisik & Sistem (Paralel)", aktivitas: "Tim fisik memproses unboxing & segregasi di area S000. Staff BKO mendampingi untuk langsung Transfer Posting di sistem", kebutuhan: "Formasi Lengkap: 1 Staff + 3 MP Fisik + 1 FL.", pic: "Tim Operasional", deadline: "04 - 24 Sep 2026" }
       ];
 
       // 6 Dokumentasi final dengan ID yang unik dan menggunakan format Thumbnail API
@@ -1279,6 +1289,128 @@
 
       const formatRupiah = (value) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
+      };
+
+      const downloadComprehensiveResume = () => {
+        const generatePDF = () => {
+            const container = document.createElement('div');
+            container.style.padding = '10px';
+            container.style.fontFamily = 'Arial, sans-serif';
+            container.style.color = '#1D2B36';
+            container.style.width = '1024px'; // Disesuaikan persis dengan batas aman A4 Landscape
+            
+            let html = `
+            <style>
+                * { box-sizing: border-box; }
+                h1 { color: #1D2B36; font-size: 18px; text-align: center; margin-bottom: 5px; text-transform: uppercase; }
+                p.date { text-align: center; font-size: 10px; margin-bottom: 15px; color: #64748b; }
+                h2 { color: #8C231C; font-size: 12px; margin-top: 15px; text-transform: uppercase; border-bottom: 2px solid #8C231C; padding-bottom: 4px; page-break-after: avoid; }
+                h3 { color: #1D2B36; font-size: 12px; margin-top: 15px; page-break-after: avoid; }
+                /* Aturan ketat agar tabel terkurung 100% dan teks otomatis turun (wrap) */
+                table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 9px; page-break-inside: auto; table-layout: fixed; word-wrap: break-word; }
+                tr { page-break-inside: avoid; page-break-after: auto; }
+                th { background-color: #1D2B36; color: white; padding: 5px; border: 1px solid #cbd5e1; text-align: left; }
+                td { padding: 5px; border: 1px solid #cbd5e1; vertical-align: top; line-height: 1.4; overflow-wrap: break-word; }
+                .text-center { text-align: center; }
+                .font-bold { font-weight: bold; }
+                .bg-gray { background-color: #f1f5f9; }
+            </style>
+            <h1>RESUME PROJECT REDUCE INVENTORY S000</h1>
+            <p class="date"><strong>Tanggal Unduh:</strong> ${new Date().toLocaleDateString('id-ID')}</p>
+            `;
+
+            // 1. Achievement Progress
+            html += `<div style="page-break-inside: avoid;">
+            <h2>1. ACHIEVEMENT PROGRESS (PLAN VS ACTUAL)</h2>
+            <table>
+                <tr><th style="width: 50%;">Indikator</th><th style="width: 50%;">Nilai</th></tr>
+                <tr><td>Total SOH (Sistem Awal)</td><td>Rp 30.372.979.447</td></tr>
+                <tr><td>Breakdown Item NON SOH</td><td>3.142 Item / Rp 6.773.956.933</td></tr>
+                <tr><td>Breakdown Item SOH</td><td>3.276 Item / Rp 23.599.022.514</td></tr>
+                <tr><td>Total Aktual (Unique QC + Duplikat + Tereliminasi + Comex)</td><td class="font-bold">${grandTotalCount} Item</td></tr>
+                <tr><td>Persentase Dari Plan (Item)</td><td class="font-bold">${qcPercentage}%</td></tr>
+                <tr><td>Total Pencapaian Value</td><td class="font-bold">${formatRupiah(grandTotalValue)}</td></tr>
+                <tr><td>Persentase Value</td><td class="font-bold">${qcValuePercentage}%</td></tr>
+            </table>
+            </div>`;
+
+            // 2. Alur Progres Proyek
+            html += `<div style="page-break-inside: avoid;">
+            <h2>2. ALUR PROGRES PROYEK</h2>
+            <table>
+                <tr><th class="text-center" style="width: 10%;">Fase</th><th style="width: 25%;">Aktivitas Utama</th><th style="width: 40%;">Sub Aktivitas</th><th class="text-center" style="width: 15%;">Durasi</th><th class="text-center" style="width: 10%;">Status</th></tr>`;
+            executionPlan.forEach(ep => {
+                html += `<tr><td class="text-center font-bold">${ep.fase}</td><td>${ep.aktivitas}</td><td>${ep.subAktivitas}</td><td class="text-center">${ep.durasi}</td><td class="text-center">${ep.status === 'completed' ? 'Selesai' : ep.status === 'in-progress' ? 'Berjalan' : 'Belum Mulai'}</td></tr>`;
+            });
+            html += `</table>
+            </div>`;
+
+            // 3. Plan Eksekusi & Timeline
+            html += `<div style="page-break-inside: avoid;">
+            <h2>3. PLAN EKSEKUSI & TIMELINE</h2>
+            <table>
+                <tr><th style="width: 25%;">Fase</th><th style="width: 25%;">Aktivitas Utama</th><th class="text-center" style="width: 15%;">Durasi</th><th class="text-center" style="width: 15%;">Start</th><th class="text-center" style="width: 10%;">End</th><th class="text-center" style="width: 10%;">Status</th></tr>`;
+            executionPlan.forEach(ep => {
+                html += `<tr><td>${ep.fase}</td><td>${ep.aktivitas}</td><td class="text-center">${ep.durasi}</td><td class="text-center">${ep.start}</td><td class="text-center">${ep.end}</td><td class="text-center">${ep.status === 'completed' ? 'Selesai' : ep.status === 'in-progress' ? 'Berjalan' : 'Pending'}</td></tr>`;
+            });
+            html += `</table>
+            </div>`;
+
+            // 4. Justifikasi & Analisa
+            html += `<div style="page-break-inside: avoid;">
+            <h2>4. JUSTIFIKASI & ANALISA KENDALA</h2>
+            <table>
+                <tr><th style="width: 20%;">Kategori</th><th style="width: 30%;">Kondisi Saat Ini</th><th style="width: 25%;">Dampak</th><th style="width: 25%;">Usulan Tindakan</th></tr>`;
+            justifikasiReportData.kendala.forEach(k => {
+                html += `<tr><td>${k.kategori}</td><td>${k.kondisi}</td><td>${k.dampak}</td><td>${k.usulan}</td></tr>`;
+            });
+            html += `</table>
+            </div>`;
+
+            // 5. PICA
+            html += `<div style="page-break-inside: avoid;">
+            <h2>5. PROBLEM IDENTIFICATION AND CORRECTIVE ACTION (PICA)</h2>
+            <table>
+                <tr><th style="width: 14%;">Problem</th><th style="width: 10%;">Why 1</th><th style="width: 10%;">Why 2</th><th style="width: 10%;">Why 3</th><th style="width: 10%;">Why 4</th><th style="width: 10%;">Why 5</th><th style="width: 14%;">Corrective Action</th><th style="width: 14%;">Preventive Action</th><th style="width: 8%;">PIC</th></tr>`;
+            picaDataArr.forEach(p => {
+                html += `<tr><td>${p.problem}</td><td>${p.why1}</td><td>${p.why2}</td><td>${p.why3}</td><td>${p.why4}</td><td>${p.why5}</td><td>${p.corrective}</td><td>${p.preventive}</td><td>${p.pic}</td></tr>`;
+            });
+            html += `</table>
+            </div>`;
+
+            // 6. Action Plan
+            html += `<div style="page-break-inside: avoid;">
+            <h2>6. ACTION PLAN RESOLUSI TIMELINE</h2>
+            <table>
+                <tr><th style="width: 20%;">Langkah</th><th style="width: 35%;">Aktivitas</th><th style="width: 20%;">Kebutuhan</th><th style="width: 15%;">PIC</th><th style="width: 10%;">Deadline</th></tr>`;
+            actionPlanDataArr.forEach(a => {
+                html += `<tr><td>${a.langkah}</td><td>${a.aktivitas}</td><td>${a.kebutuhan}</td><td>${a.pic}</td><td>${a.deadline}</td></tr>`;
+            });
+            html += `</table>
+            </div>`;
+
+            // Menempelkan kerangka HTML ke dalam container penampung
+            container.innerHTML = html;
+
+            const opt = {
+                margin:       10,
+                filename:     'Resume_Project_S000.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            window.html2pdf().set(opt).from(container).save();
+        };
+
+        if (typeof window.html2pdf === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+            script.onload = () => generatePDF();
+            document.head.appendChild(script);
+        } else {
+            generatePDF();
+        }
       };
 
       const executionPlan = [
@@ -3083,22 +3215,22 @@
                             
                             <div className="overflow-x-auto custom-scrollbar max-h-[600px] border border-slate-200 rounded-sm">
                                 <table className="w-full text-left border-collapse">
-                                    <thead className="sticky top-0 z-10 bg-[#CF584C] text-white shadow-sm">
+                                    <thead className="sticky top-0 z-10 bg-[#1D2B36] text-white shadow-sm border-b-2 border-[#CF584C]">
                                         <tr className="text-[10px] font-black uppercase tracking-wider">
                                             {gstoHeaders.map((header, idx) => (
-                                                <th key={idx} className="p-3 whitespace-nowrap border-r border-white/20 last:border-0">{header}</th>
+                                                <th key={idx} className="p-3.5 whitespace-nowrap border-r border-white/10 last:border-0">{header}</th>
                                             ))}
                                         </tr>
                                     </thead>
                                     <tbody className="text-xs text-slate-700 bg-white">
                                         {gstoData.length > 0 ? (
                                             gstoData.slice(0, 500).map((row, rowIdx) => (
-                                                <tr key={rowIdx} className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
+                                                <tr key={rowIdx} className="border-b border-slate-100 hover:bg-red-50/40 even:bg-slate-50/50 transition-colors">
                                                     {row.map((cell, cellIdx) => {
                                                         const headerText = gstoHeaders[cellIdx] ? gstoHeaders[cellIdx].toLowerCase().trim() : '';
                                                         const isValueCol = headerText.includes('value') || headerText.includes('harga') || headerText.includes('nilai') || headerText === 'total' || headerText.includes('amount');
                                                         return (
-                                                            <td key={cellIdx} className={`p-3 border-r border-slate-100 last:border-0 ${isValueCol ? 'font-mono text-right' : ''}`}>
+                                                            <td key={cellIdx} className={`p-3.5 border-r border-slate-100 last:border-0 ${isValueCol ? 'font-mono text-right font-bold text-[#1D2B36]' : 'font-medium'}`}>
                                                                 {cell}
                                                             </td>
                                                         );
@@ -3107,8 +3239,11 @@
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan={gstoHeaders.length || 1} className="p-6 text-center text-slate-500 font-bold text-xs bg-slate-50">
-                                                    Tidak ada data yang ditemukan atau gagal memuat data.
+                                                <td colSpan={gstoHeaders.length || 1} className="p-8 text-center text-slate-500 bg-slate-50">
+                                                    <div className="flex flex-col items-center justify-center gap-2">
+                                                        <Database size={24} className="text-slate-300" />
+                                                        <span className="font-bold text-xs uppercase tracking-wider">Tidak ada data yang ditemukan atau gagal memuat data.</span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )}
@@ -3779,6 +3914,52 @@
             </div>
           )}
 
+          {showActionPlanModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <div className="bg-white rounded-sm shadow-xl max-w-5xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+                    <div className="bg-emerald-700 text-white p-4 flex justify-between items-center shrink-0">
+                        <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
+                            <ListChecks size={16} /> ACTION PLAN (TIMELINE ADJUSTMENT & JUSTIFIKASI)
+                        </h3>
+                        <button onClick={() => setShowActionPlanModal(false)} className="hover:text-gray-300 font-bold text-lg leading-none">
+                            &times;
+                        </button>
+                    </div>
+                    <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-[#F8FAFC]">
+                        <div className="bg-white p-4 md:p-6 border-b border-slate-200">
+                            <h2 className="text-lg md:text-xl font-black text-[#1D2B36] uppercase tracking-tight text-center">Action Plan Resolusi Timeline Proyek S000</h2>
+                        </div>
+                        <div className="p-4 md:p-6">
+                            <div className="overflow-x-auto custom-scrollbar border border-slate-200 rounded-sm shadow-sm bg-white">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-emerald-800 text-white text-[10px] font-black uppercase tracking-wider text-center">
+                                            <th className="p-3 border-r border-white/20 w-1/5">Langkah</th>
+                                            <th className="p-3 border-r border-white/20 w-1/3">Aktivitas Eksekusi & Solusi PICA</th>
+                                            <th className="p-3 border-r border-white/20 w-1/5">Kebutuhan / Syarat Mutlak</th>
+                                            <th className="p-3 border-r border-white/20 w-32">Penanggung Jawab</th>
+                                            <th className="p-3 w-32">Tenggat Waktu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-xs text-slate-700 align-top">
+                                        {actionPlanDataArr.map((row, idx) => (
+                                            <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                                <td className="p-3 border-r border-slate-100 font-bold text-[#1D2B36] bg-slate-50/50">{row.langkah}</td>
+                                                <td className="p-3 border-r border-slate-100 leading-relaxed">{row.aktivitas}</td>
+                                                <td className="p-3 border-r border-slate-100 font-semibold text-[#8C231C] bg-red-50/20">{row.kebutuhan}</td>
+                                                <td className="p-3 border-r border-slate-100 text-center font-bold">{row.pic}</td>
+                                                <td className="p-3 text-center font-mono text-[11px] font-bold text-[#2A446C]">{row.deadline}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          )}
+
           {showJustifikasiModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                 <div className="bg-white rounded-sm shadow-xl max-w-6xl w-full overflow-hidden flex flex-col max-h-[90vh]">
@@ -4344,12 +4525,28 @@
                       </h2>
                       <div className="flex items-center gap-3">
                           <button 
+                             onClick={downloadComprehensiveResume}
+                             className="bg-[#1D2B36] hover:bg-[#2A446C] text-white px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5 border border-[#1D2B36]"
+                             title="Download Resume Keseluruhan"
+                          >
+                             <Download size={14} />
+                             <span className="hidden sm:inline">Download</span>
+                          </button>
+                          <button 
                              onClick={() => setShowPicaModal(true)}
                              className="bg-red-50 hover:bg-red-100 text-[#8C231C] px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5 border border-red-200"
                              title="PICA"
                           >
                              <AlertTriangle size={14} />
                              <span className="hidden sm:inline">PICA</span>
+                          </button>
+                          <button 
+                             onClick={() => setShowActionPlanModal(true)}
+                             className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5 border border-emerald-200"
+                             title="Action Plan"
+                          >
+                             <ListChecks size={14} />
+                             <span className="hidden sm:inline">Action Plan</span>
                           </button>
                           <button 
                              onClick={() => setShowJustifikasiModal(true)}
